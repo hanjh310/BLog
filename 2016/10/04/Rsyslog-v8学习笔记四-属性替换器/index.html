@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="rsyslog," />
+
+
+
+
+
+  <link rel="alternate" href="/rss2.xml" title="LoveOps" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="属性替换器属性替换器是rsyslogd的字符串模板系统中的一个核心组件。系统日志消息具有许多定义良好的属性。每个属性都可以被属性替换器访问和操作。有了它，很容易只使用属性值的一部分或操纵该值，例如通过将所有字符转换为小写。 访问属性系统日志消息属性在模板中使用。他们可以通过两个%，由属性替换器修改。完整的语法如下所示：">
+<meta name="keywords" content="rsyslog">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Rsyslog-v8学习笔记四(属性替换器)">
+<meta property="og:url" content="http://blog.loveops.com/2016/10/04/Rsyslog-v8学习笔记四-属性替换器/index.html">
+<meta property="og:site_name" content="LoveOps">
+<meta property="og:description" content="属性替换器属性替换器是rsyslogd的字符串模板系统中的一个核心组件。系统日志消息具有许多定义良好的属性。每个属性都可以被属性替换器访问和操作。有了它，很容易只使用属性值的一部分或操纵该值，例如通过将所有字符转换为小写。 访问属性系统日志消息属性在模板中使用。他们可以通过两个%，由属性替换器修改。完整的语法如下所示： 1%property:fromChar:toChar:options% 可用属">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-12-13T10:27:05.884Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Rsyslog-v8学习笔记四(属性替换器)">
+<meta name="twitter:description" content="属性替换器属性替换器是rsyslogd的字符串模板系统中的一个核心组件。系统日志消息具有许多定义良好的属性。每个属性都可以被属性替换器访问和操作。有了它，很容易只使用属性值的一部分或操纵该值，例如通过将所有字符转换为小写。 访问属性系统日志消息属性在模板中使用。他们可以通过两个%，由属性替换器修改。完整的语法如下所示： 1%property:fromChar:toChar:options% 可用属">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://blog.loveops.com/2016/10/04/Rsyslog-v8学习笔记四-属性替换器/"/>
+
+
+
+
+
+  <title>Rsyslog-v8学习笔记四(属性替换器) | LoveOps</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">LoveOps</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Devil'Blog</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.loveops.com/2016/10/04/Rsyslog-v8学习笔记四-属性替换器/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="devil">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LoveOps">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Rsyslog-v8学习笔记四(属性替换器)</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-10-04T18:24:15+08:00">
+                2016-10-04
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/linux/" itemprop="url" rel="index">
+                    <span itemprop="name">linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2016/10/04/Rsyslog-v8学习笔记四-属性替换器/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2016/10/04/Rsyslog-v8学习笔记四-属性替换器/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  3,423
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  12
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="属性替换器"><a href="#属性替换器" class="headerlink" title="属性替换器"></a>属性替换器</h3><p>属性替换器是rsyslogd的字符串模板系统中的一个核心组件。系统日志消息具有许多定义良好的属性。每个属性都可以被属性替换器访问和操作。有了它，很容易只使用属性值的一部分或操纵该值，例如通过将所有字符转换为小写。</p>
+<h4 id="访问属性"><a href="#访问属性" class="headerlink" title="访问属性"></a>访问属性</h4><p>系统日志消息属性在模板中使用。他们可以通过两个%，由属性替换器修改。完整的语法如下所示：</p>
+<figure class="highlight crmsh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">%<span class="keyword">property</span><span class="title"></span>:fromChar:toChar:options%</span><br></pre></td></tr></table></figure>
+<h4 id="可用属性"><a href="#可用属性" class="headerlink" title="可用属性"></a>可用属性</h4><p>属性替换器可以使用所有的rsyslog属性。</p>
+<h4 id="偏移量字段"><a href="#偏移量字段" class="headerlink" title="偏移量字段"></a>偏移量字段</h4><p>FromChar和toChar被用来构建子串。 他们指定应该复制的字符串内的偏移量。 偏移计数从1开始，所以如果您需要获取消息文本的前2个字符，则可以使用以下语法：“％msg：1：2％”。 如果你不想指定from和to，但是你想指定选项，你仍然需要包含冒号。 例如，如果要将完整的消息文本转换为小写，请使用“％msg :::小写字母％”。 如果你想从一个位置提取直到字符串结尾，你可以在toChar中放置一个美元符号（“$”）（例如％msg：10：$％，它将从位置10提取到结尾 字符串）。</p>
+<p>也支持正则表达式。 要使用它们，您需要在FromChar中放置一个“R”。 这告诉rsyslog，正则表达式而不是基于位置的提取。然后必须在toChar中提供实际的正则表达式。 正则表达式后面必须跟着字符串“–end”。它表示正则表达式的结束，不会成为它的一部分。 如果使用正则表达式，则属性替换器将返回与正则表达式匹配的属性文本部分。 具有正则表达式的属性替换序列的示例是：“％msg:R:.<em>Sev:.(.</em>\）[.*–end％”</p>
+<p>在“R”之后可以指定一些参数。 用逗号分隔。 如下：</p>
+<figure class="highlight fsharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">R,&lt;regexp-<span class="class"><span class="keyword">type</span>&gt;,&lt;submatch&gt;,&lt;nomatch&gt;,&lt;match-number&gt;</span></span><br></pre></td></tr></table></figure>
+<p>对于Posix的基本正则表达式，regexp-type是“BRE”，对于扩展的则是“ERE”。 字符串必须用大写字母表示。缺省值是“BRE”，以便与不支持ERE的rsyslog的早期版本保持一致。 子匹配标识要与结果一起使用的子匹配。 支持单个数字。 0是完整匹配，而1比9是acutal submatches。如果表达式在字符串中出现多次，则匹配号标识指定匹配哪个。 请注意，第一个匹配是0，第二个匹配是1等等。 最多支持10个匹配项（0-9）。 请注意，在submatch前面有match-number会更自然，但这会打破向后兼容性。 所以匹配号码必须在“不匹配”之后指定。</p>
+<p>nomatch指定在找不到匹配的情况下应该使用的内容。</p>
+<p>以下是ERE表达式的一个示例，它从消息字符串中获取第一个子匹配，并在未找到匹配的情况下用完整字段替换表达式：</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">%<span class="symbol">msg:</span>R,ERE,<span class="number">1</span>,<span class="symbol">FIELD:</span><span class="keyword">for</span> (vlan[<span class="number">0</span>-<span class="number">9</span>]\*)<span class="symbol">:--end%</span></span><br></pre></td></tr></table></figure>
+<p>这需要所述表达式的第二个匹配的第一个子匹配：</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">%<span class="symbol">msg:</span>R,ERE,<span class="number">1</span>,FIELD,<span class="number">1</span><span class="symbol">:for</span> (vlan[<span class="number">0</span>-<span class="number">9</span>]\*)<span class="symbol">:--end%</span></span><br></pre></td></tr></table></figure>
+<p>请注意：还有一个rsyslog正则表达式检查器/生成器在线工具可用。 使用该工具，您可以检查正则表达式，并生成有效的属性替换序列。 建议使用此工具。 根据所提供的版本，该工具可能无法涵盖所有场景，包括最常用的情况。 所以在要求苛刻的环境中手写表达式情仍然很有用。</p>
+<p>而且，提取可以基于“filed”来完成。要做到这一点，把一个“F”放入FromChar。当前定义中的字段是由分隔符分隔的任何内容。分隔符默认为TAB（US-ASCII值9）。但是，如果可以通过在“F”之后立即指定逗号和分隔符的十进制US-ASCII值来更改为任何其他US-ASCII字符。例如，要使用逗号（“，”）作为分隔符，请使用此字段说明符：“F，44”。如果您的系统日志数据是分隔的，这是比通过正则表达式（实际上更快的方法）提取更快的方法。字段计数从1开始。字段零被接受，但总是会导致“字段未找到”错误。如果请求的字段数高于属性中的字段数，则会发生同样的情况。字段号必须放在“ToChar”参数中。从msg属性中提取第三个字段（用TAB分隔）的例子如下：“％msg：F：3％”。分号与分隔符相同的例子是“％msg：F，59：3％”。</p>
+<p>字段的使用不允许选择子字符串，更不幸的是。为了解决这个问题，从6.3.9开始，可以为字符串指定fromPos和toPos。然而，这个语法是相当丑陋的，但它是将这种功能整合到已经存在的系统中的唯一方法。为此，在字段提取期间使用“fromPos”和“toPos”。让我们假设你想在前面的例子中提取从位置5到9的子字符串。然后，语法如下：“％msg：F，59,5：3,9％”。正如你所看到的，“F，59”表示字段模式，带有分号分隔符，“，5”表示从位置5开始。然后“3,9”表示字段3，字符串提取到位置9。</p>
+<p>请注意，特殊字符“F”和“R”区分大小写。只有大写的情况下，小写会返回一个错误。序列中不允许有空格（这将导致错误消息，并不会提供预期的结果）。</p>
+<p>每个字段分隔符的出现都会启动一个新的字段。但是，如果在字段分隔符之后添加加号（“+”），则多个分隔符（紧跟其他分隔符之后）会被视为单独的字段。这在syslog消息包含这样的序列的情况下可以是有用的。常见的情况可能是编写如下代码：</p>
+<figure class="highlight excel"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">int</span> <span class="built_in">n</span>, m;</span><br><span class="line">...</span><br><span class="line">syslog(LOG_ERR, <span class="string">"%d test %6d"</span>, <span class="built_in">n</span>, m);</span><br></pre></td></tr></table></figure>
+<p>这将在系统日志消息中导致类似这样的事情：“1 test 2”，“1 test 23”，“1 test 234567”</p>
+<p>正如你所看到的，这些字段是由空格字符分隔的，但其确切的数字是未知的。 他们可以适当地提取如下：</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">"%<span class="selector-tag">msg</span><span class="selector-pseudo">:F</span>,32<span class="selector-pseudo">:2</span>%" <span class="selector-tag">to</span> "%<span class="selector-tag">msg</span><span class="selector-pseudo">:F</span>,32+<span class="selector-pseudo">:2</span>%".</span><br></pre></td></tr></table></figure>
+<p>这个特点是由Zhuang Yuyao提出的，由他来执行。 它是在perl兼容正则表达式之后建模的。</p>
+<h4 id="属性选项"><a href="#属性选项" class="headerlink" title="属性选项"></a>属性选项</h4><p>属性选项不区分大小写。 目前，定义了以下选项：</p>
+<ul>
+<li><strong>uppercase</strong><br>将属性转换为大写</li>
+<li><strong>lowercase</strong><br>将属性文本转换为小写</li>
+<li><strong>fixed-width</strong><br>更改toChar的行为，以便在源字符串较短的情况下使用空格填充源字符串，直到toChar的值。 这个特性是在rsyslog 8.13.0中引入的</li>
+<li><strong>json</strong><br>对值进行编码，以便可以在JSON字段内使用该值。 这意味着几个字符（根据JSON规范）正在被转义，例如US-ASCII LF被替换为“\ n”。 json选项不能与jsonf或csv选项一起使用。</li>
+<li><strong>jsonf[:outname]</strong><br>（在6.3.9+中可用）这表示该属性应该表示为JSON字段。 这意味着不仅属性被写入，而是格式中完整的JSON字段</li>
+</ul>
+<p><strong>“fieldname”=”value”</strong></p>
+<p>其中在“outname”属性中给出了“fieldname”（如果没有分配属性名称，则为属性名称），value是属性替换操作的最终结果。 请注意，该值支持所有属性替换选项，如子字符串，大小写转换等。 值正确JSON转义，但字段名称目前不行，所以预计正确的字段名称配置。 jsonf选项不能与json或csv选项一起使用。</p>
+<p>欲了解更多信息，你可以从Rainer的博客阅读这篇文章。<br><a href="http://blog.gerhards.net/2012/04/rsyslog-templates-json.html" target="_blank" rel="noopener">http://blog.gerhards.net/2012/04/rsyslog-templates-json.html</a></p>
+<ul>
+<li><strong>csv</strong><br>按照RFC 4180中的规定，以CSV格式格式化所得字段（完成所有修改后）。Rsyslog将始终使用双引号。 请注意，为了具有完整的CSV格式的文本，您需要定义一个适当的模板。 一个例子是这样的：”%syslogtag:::csv%,%msg:::csv%”最重要的是，你需要在模板内的字段之间提供逗号。 这个特性是在rsyslog 4.1.6中引入的。</li>
+<li><strong>drop-last-lf</strong><br>消息中的最后一个LF（如果有）将被丢弃。 对PIX特别有用。</li>
+<li>date-utc<br>在输出之前将数据转换为UTC（自8.18.0起可用）</li>
+<li><strong>date-mysql</strong><br>格式为mysql日期</li>
+<li><strong>date-rfc3164</strong><br>格式为RFC 3164日期</li>
+<li><strong>date-rfc3164-buggyday</strong><br>类似于date-rfc3164，但是模拟了一个常见的编码错误：RFC 3164要求为单位数天写一个空格。 使用此选项，将写入零。 这种格式似乎被syslog-ng使用，而date-rfc3164-buggyday选项可以用于迁移场景，否则很多脚本需要调整。 建议在转发到远程主机时不要使用此选项 - 他们可能会将日期视为无效（尤其是严格按照RFC 3164进行解析时）。</li>
+</ul>
+<p>这个特性是在rsyslog 4.6.2和v4以上版本和5.5.3以及所有版本中引入的。</p>
+<ul>
+<li><strong>date-rfc3339</strong><br>格式为RFC 3339日期</li>
+<li><strong>date-unixtimestamp</strong><br>格式化为一个unix时间戳（自纪元以来的秒数）</li>
+<li><strong>date-year</strong><br>只是一个时间戳的年份（4位数字）</li>
+<li><strong>date-month</strong><br>只是一个时间戳的月份（2位数字）</li>
+<li><strong>date-day</strong><br>只是一个时间戳的天（2位数字）</li>
+<li><strong>date-hour</strong><br>只是一个时间戳的小时（2位数字，24小时制）</li>
+<li><strong>date-minute</strong><br>只是一个时间戳的分钟（2位数字）</li>
+<li><strong>date-second</strong><br>只是时间戳的秒（2位数字）</li>
+<li><strong>date-subseconds</strong><br>只是时间戳的亚秒（对于低精度时间戳，始终为0）</li>
+<li><strong>date-tzoffshour</strong><br>只是时间戳的时区偏移小时部分（2位）</li>
+<li><strong>date-tzoffsmin</strong><br>只是时区的时区偏移分钟部分（2位数字）。 请注意，这通常是0，但是有一些时区的偏移量不是按小时粒度的。 如果是这样，这是分钟的抵消。</li>
+<li><strong>date-tzoffsdirection</strong><br>只是时间戳的时区偏移方向部分。 这指定是否需要将时间戳添加（“+”）或减去（“ - ”）以获得UTC。</li>
+<li><strong>date-ordinal</strong><br>返回给定日期的序号，例如 1月2日是2</li>
+<li><strong>date-week</strong><br>返回周数</li>
+<li><strong>date-wday</strong><br>时间戳的周几。 这是一个数字，0 =星期天，1 =星期一，…，6 =星期六。</li>
+<li><strong>date-wdayname</strong><br>只是时间戳的星期几的缩写英文名称 (例如： “Mon”, “Sat”)</li>
+<li><strong>escape-cc</strong><br>用转义序列替换控制字符（ASCII值为127，值小于32）。 序列是“＃<charval>”，其中charval是控制字符的3位十进制值。 例如，制表符将被替换为“＃009”。 注意：使用这个选项需要将$ EscapeControlCharactersOnReceive设置为off.</charval></li>
+<li><strong>space-cc</strong><br>用空格替换控制字符注意：使用这个选项需要将$ EscapeControlCharactersOnReceive设置为off。</li>
+<li><strong>drop-cc</strong><br>删除控制字符 - 结果字符串将不包含控制字符，转义序列或任何其他替换字符，如空间。 注意：使用这个选项需要将$ EscapeControlCharactersOnReceive设置为off。</li>
+<li><strong>compressspace</strong><br>将字符串内部的多个空格（US-ASCII SP字符）压缩为一个空格。 这种压缩发生在处理的非常晚的阶段。 最重要的是，它在子字符串提取后发生，所以FromChar和ToChar位置不受此选项的影响。 （从v8.18.0开始可用）</li>
+<li><strong>sp-if-no-1st-sp</strong><br>这个选项看起来很可怕，应该不会被用户使用。对于给定的任何字段，它返回一个空格字符或根本没有字符。字段内容永远不会返回。如果（且仅当）字段内容的第一个字符不是空格，则返回空格。这个选项是解决根源于RFC 3164的问题的一种方法：3164在syslog标记序列和实际的消息文本之间没有指定分隔符。实际上几乎所有的实现都是由一个空格来划分的。从RFC 3164开始，这个空间是消息文本本身的一部分。这在构建消息时（例如写入磁盘或转发时）会导致问题。如果邮件不是从一个开始的，是否应该包含分隔空间？如果没有，标签之后紧跟着另一个非空格字符，这可能导致一些日志解析器误解标签和消息是什么。当klog模块被重新构建并且标签正确写入时，问题最终浮出水面。它也与其他消息源一起存在。解决方案是引入这个特殊的财产替代选项。现在，默认模板可以包含一个条件空间，只有在消息不是以一个开头的情况下才存在。虽然这不能解决所有问题，但在绝大多数情况下，它应该工作得很好。如果你阅读这个文本，不知道它在说什么 - 放松：这是一个很好的迹象，你永远不会需要这个选项。简单地忘掉它;）</li>
+<li><strong>secpath-drop</strong><br>去掉字段内反斜线（例如，“a/b”变成“ab”）。 用于安全路径名的生成（使用动态文件）。</li>
+<li><strong>secpath-replace</strong><br>用下划线替换字段内的斜线。 （例如“a/b”变成“a_b”）。 用于安全路径名的生成（使用动态文件）。</li>
+</ul>
+<p>要使用多个选项，只需将它们一个接一个地用逗号分隔。 例如“escape-cc，sp-if-no-1st-sp”。 如果一起使用冲突选项，则最后一个将覆盖前一个选项。 例如，使用“escape-cc，drop-cc”将使用drop-cc，“drop-cc，escape-cc”将使用escape-cc模式。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/rsyslog/" rel="tag"># rsyslog</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/10/03/rsyslog-v8学习笔记三-Rsyslog属性/" rel="next" title="rsyslog-v8学习笔记三(Rsyslog属性)">
+                <i class="fa fa-chevron-left"></i> rsyslog-v8学习笔记三(Rsyslog属性)
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/10/05/Rsyslog-v8学习笔记五-Property-Replacer不匹配模式/" rel="prev" title="Rsyslog-v8学习笔记五(Property Replacer不匹配模式)">
+                Rsyslog-v8学习笔记五(Property Replacer不匹配模式) <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.gif"
+                alt="devil" />
+            
+              <p class="site-author-name" itemprop="name">devil</p>
+              <p class="site-description motion-element" itemprop="description">Good Good Study！Day Day Up！</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">27</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">18</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/rss2.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/hanjh310" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#属性替换器"><span class="nav-number">1.</span> <span class="nav-text">属性替换器</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#访问属性"><span class="nav-number">1.1.</span> <span class="nav-text">访问属性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#可用属性"><span class="nav-number">1.2.</span> <span class="nav-text">可用属性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#偏移量字段"><span class="nav-number">1.3.</span> <span class="nav-text">偏移量字段</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#属性选项"><span class="nav-number">1.4.</span> <span class="nav-text">属性选项</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">devil</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.3</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://https-blog-loveops-org.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://blog.loveops.com/2016/10/04/Rsyslog-v8学习笔记四-属性替换器/';
+          this.page.identifier = '2016/10/04/Rsyslog-v8学习笔记四-属性替换器/';
+          this.page.title = 'Rsyslog-v8学习笔记四(属性替换器)';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://https-blog-loveops-org.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

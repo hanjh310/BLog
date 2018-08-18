@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="rsyslog," />
+
+
+
+
+
+  <link rel="alternate" href="/rss2.xml" title="LoveOps" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="模板 模板是rsyslog的一个关键特性。它们允许用户自定义需要的任何格式。也用于生成动态文件名。 rsyslog中的每个输出都使用模板，  这适用于文件，用户消息等。数据库编写者期望它的模板是一个适当的SQL语句 - 所以这也是高度可定制的。您可能会问，如果没有指定模板，所有这些工作是如何进行的。好问题 ;）。但答案">
+<meta name="keywords" content="rsyslog">
+<meta property="og:type" content="article">
+<meta property="og:title" content="rsyslog-v8学习笔记二(模板)">
+<meta property="og:url" content="http://blog.loveops.com/2016/10/02/rsyslog-v8学习笔记二-模板/index.html">
+<meta property="og:site_name" content="LoveOps">
+<meta property="og:description" content="模板 模板是rsyslog的一个关键特性。它们允许用户自定义需要的任何格式。也用于生成动态文件名。 rsyslog中的每个输出都使用模板，  这适用于文件，用户消息等。数据库编写者期望它的模板是一个适当的SQL语句 - 所以这也是高度可定制的。您可能会问，如果没有指定模板，所有这些工作是如何进行的。好问题 ;）。但答案很简单。模板与硬编码到rsyslogd的stock syslogd格式兼容。所以">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-12-12T13:04:54.420Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="rsyslog-v8学习笔记二(模板)">
+<meta name="twitter:description" content="模板 模板是rsyslog的一个关键特性。它们允许用户自定义需要的任何格式。也用于生成动态文件名。 rsyslog中的每个输出都使用模板，  这适用于文件，用户消息等。数据库编写者期望它的模板是一个适当的SQL语句 - 所以这也是高度可定制的。您可能会问，如果没有指定模板，所有这些工作是如何进行的。好问题 ;）。但答案很简单。模板与硬编码到rsyslogd的stock syslogd格式兼容。所以">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://blog.loveops.com/2016/10/02/rsyslog-v8学习笔记二-模板/"/>
+
+
+
+
+
+  <title>rsyslog-v8学习笔记二(模板) | LoveOps</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">LoveOps</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Devil'Blog</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.loveops.com/2016/10/02/rsyslog-v8学习笔记二-模板/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="devil">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LoveOps">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">rsyslog-v8学习笔记二(模板)</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-10-02T21:02:23+08:00">
+                2016-10-02
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/linux/" itemprop="url" rel="index">
+                    <span itemprop="name">linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2016/10/02/rsyslog-v8学习笔记二-模板/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2016/10/02/rsyslog-v8学习笔记二-模板/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  5,115
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  20
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="模板"><a href="#模板" class="headerlink" title="模板"></a>模板</h3><ul>
+<li>模板是rsyslog的一个关键特性。它们允许用户自定义需要的任何格式。也用于生成动态文件名。 rsyslog中的每个输出都使用模板，  这适用于文件，用户消息等。数据库编写者期望它的模板是一个适当的SQL语句 - 所以这也是高度可定制的。您可能会问，如果没有指定模板，所有这些工作是如何进行的。好问题 ;）。但答案很简单。模板与硬编码到rsyslogd的stock syslogd格式兼容。所以如果没有指定模板，我们使用这些硬编码模板之一。在rsconf.c中搜索“template_”，你会发现硬编码的。</li>
+<li>模板由template()语句指定。它们也可以通过$template老版本语句指定。</li>
+<li>注意：模板的关键元素是rsyslog属性。请参阅rsyslog属性参考以获取可用列表。</li>
+</ul>
+<h4 id="模版处理"><a href="#模版处理" class="headerlink" title="模版处理"></a>模版处理</h4><ul>
+<li>由于缺乏关于日志格式的标准化，当一个模板被指定时，它应该包含HEADER，<br>如RFC5424中所定义的</li>
+<li>记住这一点非常重要，以及如何理解rsyslog解析如何工作</li>
+</ul>
+<p>例如，如果MSG字段被设置为“this：is  message”而没有HOSTNAME，那么两个TAG都不被指定，output解析器会将消息拆分为：</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">TAG:</span><span class="string">this:</span></span><br><span class="line"><span class="string">MSG:</span>is a message</span><br></pre></td></tr></table></figure>
+<h4 id="template-语句"><a href="#template-语句" class="headerlink" title="template()语句"></a>template()语句</h4><p>template（）语句用于定义模板。请注意，这是一个静态语句，这意味着所有模板都是在rsyslog读取配置文件时定义的。因此，模板不受if语句或配置嵌套的影响。</p>
+<p>模板语句的基本结构如下：</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="title">template</span><span class="params">(parameters)</span></span></span><br></pre></td></tr></table></figure>
+<p>除了这个更简单的语法之外，列表模板（将在下面描述）支持扩展语法：</p>
+<figure class="highlight dsconfig"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">template(</span><span class="string">parameters)</span> &#123; <span class="built_in">list-descriptions</span> &#125;</span><br></pre></td></tr></table></figure>
+<p>每个模板都有一个指定模板名称的参数名称和一个指定模板类型的参数类型。 name参数必须是唯一的，如果不是，行为是不可预知的。类型参数指定不同的模板类型。不同的类型只是使用不同的方式来指定模板内容。模板类型不影响（输出）插件可以用它做什么。因此，请使用最适合您需求的类型（从配置书写的角度来看！）。以下类型可用：</p>
+<ul>
+<li>list</li>
+<li>subtree</li>
+<li>string</li>
+<li>plugin</li>
+</ul>
+<p>下面介绍各种类型：</p>
+<h5 id="list"><a href="#list" class="headerlink" title="list"></a>list</h5><p>在这种情况下，模板是由一系列常量和变量语句生成的。这些遵循大括号中的模板规范。这种类型也主要用于结构感知输出，如ommongodb。但是，它也适用于基于文本的输出。如果需要更复杂的属性替换，我们建议使用这种模式。在这种情况下，基于列表的模板语法比简单的基于字符串的语法清晰得多。</p>
+<p>列表模板包含模板头（type =“list”），后面跟着常量和属性语句，用花括号表示它们所属的模板语句。正如名字所说，常量语句描述了常量文本和属性描述了属性访问。财产有很多选择，下面进一步描述。大多数这些选项只用于提取部分属性内容或修改所获得的文本（如仅将大小写更改为大写或小写）一个例子：</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">template(<span class="attribute">name</span>=<span class="string">"tpl1"</span> <span class="attribute">type</span>=<span class="string">"list"</span>) &#123;</span><br><span class="line">    constant(<span class="attribute">value</span>=<span class="string">"Syslog MSG is: '"</span>)</span><br><span class="line">    property(<span class="attribute">name</span>=<span class="string">"msg"</span>)</span><br><span class="line">    constant(<span class="attribute">value</span>=<span class="string">"', "</span>)</span><br><span class="line">    property(<span class="attribute">name</span>=<span class="string">"timereported"</span> <span class="attribute">dateFormat</span>=<span class="string">"rfc3339"</span> <span class="attribute">caseConversion</span>=<span class="string">"lower"</span>)</span><br><span class="line">    constant(<span class="attribute">value</span>=<span class="string">"\n"</span>)</span><br><span class="line">    &#125;  #这个示例可能主要针对通常的基于文件的输出。</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>常量定义（constant statement）</p>
+</blockquote>
+<p>这提供了一种指定常量文本的方法。它主要用于基于文本的输出，因此可以包含一些常量文本。 例如，如果为文件输出构建复杂的模板，通常需要用换行符来完成，可以通过常量语句来引入。 下面是rsylsog测试平台的实际使用案例：</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">template(<span class="attribute">name</span>=<span class="string">"outfmt"</span> <span class="attribute">type</span>=<span class="string">"list"</span>) &#123;</span><br><span class="line">    property(<span class="attribute">name</span>=<span class="string">"$!usr!msgnum"</span>)</span><br><span class="line">    constant(<span class="attribute">value</span>=<span class="string">"\n"</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>以下转义字符在常量文本中被识别：</p>
+<ul>
+<li>\ - 单个反斜杠</li>
+<li>\ n - LF</li>
+<li>\ ooo - （三个八进制数字） - 表示具有此数值的字符（例如\ 101等于“A”）。 请注意，必须给出三个八进制数字（与一到三个是有效的语言不一样）。 虽然我们支持八进制表示法，但我们建议使用十六进制表示法，因为这更为人所知。</li>
+<li>\ xhh - （其中h是十六进制数字） - 表示具有此数值的字符（例如\ x41等于“A”）。 请注意，必须给出两个十六进制数字（与一到三个是有效的语言不一样）。</li>
+<li>其他的需要扩展</li>
+</ul>
+<p>注意：如果一个不支持的字符出现在反斜杠之后，这会被视为错误。 在这种情况下行为是不可预测的。</p>
+<p>为了帮助使用基于文本的输出和结构化输出的相同模板，创建结构化输出的名称/值树时，将忽略不带“outname”参数的常量文本，所以，如果你想提供一些常量文本，例如 到mongodb，你必须包括一个outname参数，如下所示：</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">template(<span class="attribute">name</span>=<span class="string">"outfmt"</span> <span class="attribute">type</span>=<span class="string">"list"</span>) &#123;</span><br><span class="line">    property(<span class="attribute">name</span>=<span class="string">"$!usr!msgnum"</span>)</span><br><span class="line">    constant(<span class="attribute">value</span>=<span class="string">"\n"</span> <span class="attribute">outname</span>=<span class="string">"IWantThisInMyDB"</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>“常量”语句支持以下参数：</p>
+<ul>
+<li>value - 使用的常数值</li>
+<li>outname - 输出字段名称（用于结构化输出）</li>
+</ul>
+<blockquote>
+<p>属性定义</p>
+</blockquote>
+<p>此字段用于包含属性的文本。 它可以访问所有的属性。 此外，选项允许指定仅属性的一部分或修改它。 它支持以下参数：</p>
+<ul>
+<li>name - 要访问的属性的名称</li>
+<li>outname - 输出字段名称（用于结构化输出）</li>
+<li>dateformat - 日期格式（仅用于与日期相关的属性）</li>
+<li>date.inUTC - 日期应以UTC显示（请注意，由于必要的转换，这需要更多的性能）自8.18.0起可用。</li>
+<li>caseconversion - 大小写转转，支持”lower”和”upper”</li>
+<li>controlcharacters - 控制字符. 支持 “escape”, 转义, “space”, 替换为空格,  “drop”, 从字符串中删除</li>
+<li>securepath - 用于创建适合在dynafile模板中使用的路径名</li>
+<li>format - 指定格式 支持：</li>
+</ul>
+<figure class="highlight mipsasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"CSV"</span>    生成csv-data时使用“csv”</span><br><span class="line">“<span class="keyword">JSON” </span>  格式适当的<span class="keyword">JSON内容（但没有字段标题）</span></span><br><span class="line"><span class="keyword">“jsonf” </span> 格式为完整的<span class="keyword">json字段</span></span><br><span class="line"><span class="keyword">“jsonr” </span> 避免了双重转义的价值，但使<span class="keyword">json字段的安全</span></span><br><span class="line"><span class="keyword">“jsonfr” </span>“<span class="keyword">jsonr”和"jsonf"的组合的“jsonfr”。</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>position.from - 获取从这个位置开始的子串（1是第一个位置）</li>
+<li>position.to - 获得这个位置的子串</li>
+<li>position.relativeToEnd - from和to的位置是相对于字符串的结尾，而不是通常的字符串开头。 （自rsyslog v7.3.10以后可用）</li>
+<li>fixedwidth - 改变position.to的行为，以便如果源字符串较短，则将源字符串的空格填充到position.to的值。 “on”或“off”（默认）（自rsyslog v8.13.0以后可用）</li>
+<li>compressspace - 将字符串内部的多个空格（US-ASCII SP字符）压缩为一个空格。 这种压缩发生在处理的非常晚的阶段。 最重要的是，它发生在子字符串提取后，所以position.from和position.to位置不受此选项的影响。 （从v8.18.0开始可用）。</li>
+<li>field.number - 获取字段匹配</li>
+<li>field.delimiter - 字段提取的分隔符</li>
+<li>regex.expression - 正则表达式</li>
+<li>regex.type - 正则表达式类型：扩展正则表达式或者基本表达式</li>
+<li>regex.nomatchmode - 没匹配大埔的动作</li>
+<li>regex.match - 使用匹配</li>
+<li>regex.submatch - 使用submatch </li>
+<li>droplastlf - drop a trailing LF, if it is present</li>
+<li>mandatory - 表示一个字段是强制性的。如果设置为“on”，即使该数据为空，该字段也将始终存在于传递给结构化输出的数据中。如果“off”（默认）空字段不会传递到结构化输出。 这对于支持动态模式的输出（如ommongodb）特别有用。</li>
+<li>spifno1stsp - RFC3164模板处理的专家选项</li>
+</ul>
+<h4 id="subtree"><a href="#subtree" class="headerlink" title="subtree"></a>subtree</h4><p>自rsyslog 7.1.4起可用</p>
+<p>在这种情况下，模板是基于完整（CEE）子树生成的。这种类型的模板对于知道如何处理层次结构的输出（如ommongodb）非常有用。使用该类型时，必须指定subtree参数子树，该参数会指示使用哪个subtree。例如template（name =“tpl1”type =“subtree” subtree =“$！”）包括所有CEE数据，而template（name =“tpl2”type =“subtree” subtree =“$！usr！tpl2”）包括只有以$!user!tpl2开头的subtree。使用这种类型的模板的核心思想是实际的数据是通过set和unset的脚本语句预制的，然后在模板内使用生成的结构。如果需要将完整的suntree直接放置到对象的根目录中，则必须使用此方法。使用所有其他模板类型，只能生成子容器。请注意，subtree类型也可以与基于文本的输出一起使用，如omfile。但是，您没有任何指定常量文本，因此不能包含换行符。因此，对于文本输出使用此模板类型通常仅对调试或非常特殊的情况（例如稍后由JSON解析器解释文本的位置）有用。</p>
+<h5 id="使用场景"><a href="#使用场景" class="headerlink" title="使用场景"></a>使用场景</h5><p>一个典型的用例是首先创建一个自定义的子树，然后将其包含到模板中，就像这个小例子一样：</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="builtin-name">set</span> $!usr!tpl2!msg = <span class="variable">$msg</span>;</span><br><span class="line"><span class="builtin-name">set</span> $!usr!tpl2!dataflow = field(<span class="variable">$msg</span>, 58, 2);</span><br><span class="line">template(<span class="attribute">name</span>=<span class="string">"tpl2"</span> <span class="attribute">type</span>=<span class="string">"subtree"</span> <span class="attribute">subtree</span>=<span class="string">"$!usr!tpl2"</span>)</span><br></pre></td></tr></table></figure>
+<p>在这里，我们假设$ msg包含各种字段，并且来自字段的数据将作为字段内容与消息一起被提取和存储。</p>
+<h4 id="字符串（string）"><a href="#字符串（string）" class="headerlink" title="字符串（string）"></a>字符串（string）</h4><p>这非常类似于老版本的模板语句。它有一个必需的参数字符串，它保存要应用的模板字符串。 模板字符串是常量文本和替换变量的混合（请参阅属性替换器）。 当生成传递给插件的最终字符串时，这些变量将从消息或其他动态内容中获取。 基于字符串的模板是指定文本内容的好方法，特别是如果不需要对属性进行复杂的操作。<br>这是一个基于字符串模板的示例：</p>
+<figure class="highlight dos"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">template(name="tpl3" <span class="built_in">type</span>="string"</span><br><span class="line">         string="<span class="variable">%TIMESTAMP:::date-rfc3339%</span> <span class="variable">%HOSTNAME%</span> <span class="variable">%syslogtag%</span><span class="variable">%msg:::sp-if-no-1st-sp%</span><span class="variable">%msg:::drop-last-lf%</span>\n"</span><br><span class="line">        )</span><br></pre></td></tr></table></figure>
+<p>百分号（’％’）之间的文本由rsyslog属性替换器解释。 简而言之，它包含要使用的属性以及用于格式化和进一步处理的选项。 这与列表模板中的属性对象非常相似（它实际上是用不通方式表达大部分相同事物）。</p>
+<p>百分号以外的所有内容都是不变的文本。就像上面的例子中，我们大多数属性值之间的空格。 在字符串的末尾，使用转义符。</p>
+<p>转义符允许指定不可打印的字符。他们的工作非常类似于C和许多其他语言的转义符。 它们由反斜杠字符开始，后跟一个或多个指定实际字符的字符。 例如\ 7是US-ASCII BEL字符，\ n是一个换行符。 这个集合与C和Perl支持的类似，但是有一些限制。</p>
+<h4 id="plugin"><a href="#plugin" class="headerlink" title="plugin"></a>plugin</h4><p>在这种情况下，模板由一个插件生成（然后称为“strgen”或“字符串生成器”）。 这种格式在编码时是固定的。虽然这是不灵活的，它提供了卓越的性能，这个是经常使用的原因（不是“常规”模板是慢的，但在非常苛刻的环境下，“最后一刻”可以有所作为）。 有关更多详细信息，请参阅插件的文档。 对于这种类型，必须指定参数插件，并且必须包含插件名称，因为它标识了自身。 请注意，插件必须在模板内部使用之前加载。 配置示例：</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">template(<span class="attribute">name</span>=<span class="string">"tpl4"</span> <span class="attribute">type</span>=<span class="string">"plugin"</span> <span class="attribute">plugin</span>=<span class="string">"mystrgen"</span>)</span><br></pre></td></tr></table></figure>
+<h4 id="options"><a href="#options" class="headerlink" title="options"></a>options</h4><p><options>是可选的。 作为模板参数的一部分，它将影响整个模板。 具体见下面的细节。 请务必不要将模板选项与属性选项相混淆 - 后者由属性替换器处理，仅适用于SINGLE属性（而不适用于整个模板）。 模板选项不区分大小写。 目前定义的是：</options></p>
+<ul>
+<li>option.sql - 格式化适合于MySQL格式的SQL语句的字符串。 字符串中单引号（“’”）和反斜线将被转义符”\”转义 请注意，在MySQL配置中，必须关闭NO_BACKSLASH_ESCAPES模式才能使这种格式起作用（这是默认设置）。</li>
+<li>option.stdsql - 格式化适合要发送到符合标准的sql服务器的SQL语句的字符串。 这将在每个字段内用两个单引号（“’’”）替换单引号（“’”）。 如果在MySQL配置中启用了NO_BACKSLASH_ESCAPES，则必须与MySQL一起使用stdsql。</li>
+<li>option.json - 格式化适合json语句的字符串。在每个字段内用两个单引号（“’’”）替换单引号（“’”）。</li>
+<li>option.casesensitive - 将属性名称引用视为区分大小写。 默认值是“off”，其中所有属性名称引用在模板定义期间首先转换为小写。 将此选项打开后，将按照模板中的定义查找属性名称。 如果您具有包含大写字母的JSON（$！<em>），local（！。</em>）或global（$！\ *）属性，请使用此选项。正常的Rsyslog属性是不区分大小写的，所以这个选项不需要正确引用那些属性。</li>
+</ul>
+<p>使用选项option.sql，option.stdsql和option.json是互斥的。 同时使用多个可能导致不可预知的行为。</p>
+<p>当使用模板写入数据库时​​，必须指定sql或stdsql选项，否则可能会发生注入。请注意，由于不幸的事实，有几家供应商违反了SQL标准，并引入了自己的逃生方法，所以不可能有一个单一的选择做所有的工作。所以你自己一定要确保你使用的是正确的格式。如果你选错了，你仍然很容易sql注入。请注意，数据库编写器会检查模板中是否存在sql选项。如果不存在，则写入数据库操作将被禁用。这是为了防止意外忘记它，然后变得容易受到SQL注入。 sql选项对于文件也是有用的 - 特别是如果你想将它们导入另一台机器上的数据库时，出于性能的考虑。但是，如果您没有真正的需求，就不要使用它 - 除此之外，处理时间会受到一些影响。不多，但在一个非常繁忙的系统上，您可能会注意到它。</p>
+<p>写入数据库操作的默认模板具有设置的sql选项。 由于我们目前仅支持MySQL，并且SQL选项与默认的MySQL配置相匹配，所以这是一个不错的选择。 但是，如果您在MySQL配置中打开了NO_BACKSLASH_ESCAPES，则需要提供一个带有stdsql选项的模板。 否则，你将变得容易SQL注入。</p>
+<figure class="highlight perl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">template (name=<span class="string">"TraditionalFormat"</span> type=<span class="string">"string"</span></span><br><span class="line">string=<span class="string">"%timegenerated% %HOSTNAME% %syslogtag%%msg%\\n"</span></span><br></pre></td></tr></table></figure>
+<h4 id="范例"><a href="#范例" class="headerlink" title="范例"></a>范例</h4><ul>
+<li>写入文件的标准模板</li>
+</ul>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">template(<span class="attribute">name</span>=<span class="string">"FileFormat"</span> <span class="attribute">type</span>=<span class="string">"list"</span>) &#123;</span><br><span class="line">    property(<span class="attribute">name</span>=<span class="string">"timestamp"</span> <span class="attribute">dateFormat</span>=<span class="string">"rfc3339"</span>)</span><br><span class="line">    constant(<span class="attribute">value</span>=<span class="string">" "</span>)</span><br><span class="line">    property(<span class="attribute">name</span>=<span class="string">"hostname"</span>)</span><br><span class="line">    constant(<span class="attribute">value</span>=<span class="string">" "</span>)</span><br><span class="line">    property(<span class="attribute">name</span>=<span class="string">"syslogtag"</span>)</span><br><span class="line">    property(<span class="attribute">name</span>=<span class="string">"msg"</span> <span class="attribute">spifno1stsp</span>=<span class="string">"on"</span> )</span><br><span class="line">    property(<span class="attribute">name</span>=<span class="string">"msg"</span> <span class="attribute">droplastlf</span>=<span class="string">"on"</span> )</span><br><span class="line">    constant(<span class="attribute">value</span>=<span class="string">"\n"</span>)</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>等效的字符串模板如下所示：（请注意，模板字符串本身必须在一行上。）</p>
+<figure class="highlight dos"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">template(name="FileFormat" <span class="built_in">type</span>="string"</span><br><span class="line">         string= "<span class="variable">%TIMESTAMP%</span> <span class="variable">%HOSTNAME%</span> <span class="variable">%syslogtag%</span><span class="variable">%msg:::sp-if-no-1st-sp%</span><span class="variable">%msg:::drop-last-lf%</span>\n"</span><br><span class="line">        )</span><br></pre></td></tr></table></figure>
+<ul>
+<li>用于转发到远程主机的标准模板（RFC3164模式）</li>
+</ul>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">template(<span class="attribute">name</span>=<span class="string">"ForwardFormat"</span> <span class="attribute">type</span>=<span class="string">"list"</span>) &#123;</span><br><span class="line">    constant(<span class="attribute">value</span>=<span class="string">"&lt;"</span>)</span><br><span class="line">    property(<span class="attribute">name</span>=<span class="string">"pri"</span>)</span><br><span class="line">    constant(<span class="attribute">value</span>=<span class="string">"&gt;"</span>)</span><br><span class="line">    property(<span class="attribute">name</span>=<span class="string">"timestamp"</span> <span class="attribute">dateFormat</span>=<span class="string">"rfc3339"</span>)</span><br><span class="line">    constant(<span class="attribute">value</span>=<span class="string">" "</span>)</span><br><span class="line">    property(<span class="attribute">name</span>=<span class="string">"hostname"</span>)</span><br><span class="line">    constant(<span class="attribute">value</span>=<span class="string">" "</span>)</span><br><span class="line">    property(<span class="attribute">name</span>=<span class="string">"syslogtag"</span> position.<span class="attribute">from</span>=<span class="string">"1"</span> position.<span class="attribute">to</span>=<span class="string">"32"</span>)</span><br><span class="line">    property(<span class="attribute">name</span>=<span class="string">"msg"</span> <span class="attribute">spifno1stsp</span>=<span class="string">"on"</span> )</span><br><span class="line">    property(<span class="attribute">name</span>=<span class="string">"msg"</span>)</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>等效的字符串模板如下所示：（请注意，模板字符串本身必须在一行上。）</p>
+<figure class="highlight dos"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">template(name="forwardFormat" <span class="built_in">type</span>="string"</span><br><span class="line">         string="&lt;<span class="variable">%PRI%</span>&gt;<span class="variable">%TIMESTAMP:::date-rfc3339%</span> <span class="variable">%HOSTNAME%</span> <span class="variable">%syslogtag:1:32%</span><span class="variable">%msg:::sp-if-no-1st-sp%</span><span class="variable">%msg%</span>"</span><br><span class="line">        )</span><br></pre></td></tr></table></figure>
+<p>用于写入MySQL数据库的标准模板：</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">template(<span class="attribute">name</span>=<span class="string">"StdSQLformat"</span> <span class="attribute">type</span>=<span class="string">"list"</span> option.<span class="attribute">sql</span>=<span class="string">"on"</span>) &#123;</span><br><span class="line">        constant(<span class="attribute">value</span>=<span class="string">"insert into SystemEvents (Message, Facility, FromHost, Priority, DeviceReportedTime, ReceivedAt, InfoUnitID, SysLogTag)"</span>)</span><br><span class="line">        constant(<span class="attribute">value</span>=<span class="string">" values ('"</span>)</span><br><span class="line">        property(<span class="attribute">name</span>=<span class="string">"msg"</span>)</span><br><span class="line">        constant(<span class="attribute">value</span>=<span class="string">"', "</span>)</span><br><span class="line">        property(<span class="attribute">name</span>=<span class="string">"syslogfacility"</span>)</span><br><span class="line">        constant(<span class="attribute">value</span>=<span class="string">", '"</span>)</span><br><span class="line">        property(<span class="attribute">name</span>=<span class="string">"hostname"</span>)</span><br><span class="line">        constant(<span class="attribute">value</span>=<span class="string">"', "</span>)</span><br><span class="line">        property(<span class="attribute">name</span>=<span class="string">"syslogpriority"</span>)</span><br><span class="line">        constant(<span class="attribute">value</span>=<span class="string">", '"</span>)</span><br><span class="line">        property(<span class="attribute">name</span>=<span class="string">"timereported"</span> <span class="attribute">dateFormat</span>=<span class="string">"mysql"</span>)</span><br><span class="line">        constant(<span class="attribute">value</span>=<span class="string">"', '"</span>)</span><br><span class="line">        property(<span class="attribute">name</span>=<span class="string">"timegenerated"</span> <span class="attribute">dateFormat</span>=<span class="string">"mysql"</span>)</span><br><span class="line">        constant(<span class="attribute">value</span>=<span class="string">"', "</span>)</span><br><span class="line">        property(<span class="attribute">name</span>=<span class="string">"iut"</span>)</span><br><span class="line">        constant(<span class="attribute">value</span>=<span class="string">", '"</span>)</span><br><span class="line">        property(<span class="attribute">name</span>=<span class="string">"syslogtag"</span>)</span><br><span class="line">        constant(<span class="attribute">value</span>=<span class="string">"')"</span>)</span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure>
+<p>等效的字符串模板如下所示：（请注意，模板字符串本身必须在一行上。）</p>
+<figure class="highlight perl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">template(name=<span class="string">"stdSQLformat"</span> type=<span class="string">"string"</span> option.sql=<span class="string">"on"</span></span><br><span class="line">         string=<span class="string">"insert into SystemEvents (Message, Facility, FromHost, Priority, DeviceReportedTime, ReceivedAt, InfoUnitID, SysLogTag) values ('%msg%', %syslogfacility%, '%HOSTNAME%', %syslogpriority%, '%timereported:::date-mysql%', '%timegenerated:::date-mysql%', %iut%, '%syslogtag%')"</span></span><br><span class="line">        )</span><br></pre></td></tr></table></figure>
+<ul>
+<li>为omfile创建动态文件名：</li>
+</ul>
+<p>可以使用模板来生成具有动态文件名称的操作。 例如，如果要将不同主机的系统日志消息拆分为不同的文件（每个主机一个），则可以定义以下模板：</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">template (<span class="attribute">name</span>=<span class="string">"DynFile"</span> <span class="attribute">type</span>=<span class="string">"string"</span> <span class="attribute">string</span>=<span class="string">"/var/log/system-%HOSTNAME%.log"</span>)</span><br></pre></td></tr></table></figure>
+<p>老版本的例子：</p>
+<figure class="highlight perl"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$template DynFile,<span class="string">"/var/log/system-%HOSTNAME%.log"</span></span><br></pre></td></tr></table></figure>
+<p>这个模板可以在定义动作时使用。 这将动态生成类似一下文件“/var/log/system-localhost.log”</p>
+<h4 id="老版本格式"><a href="#老版本格式" class="headerlink" title="老版本格式"></a>老版本格式</h4><p>在rsyslog的v6以前版本中，您需要使用$ template语句来配置模板。 它们提供了基于字符串和插件的模板。 传统语法在v7中可以继续使用，但是我们建议新编写的配置文件避免使用老版本格式。 传统和当前的配置语句可以在同一个配置文件中共存。</p>
+<p>通用语法：</p>
+<figure class="highlight gams"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta"><span class="meta-keyword">$template</span> name,param[,options]</span></span><br></pre></td></tr></table></figure>
+<p>其中“name”是模板名称，“param”是指定模板内容的单个参数。 可选的“options”部分用于设置模板选项。</p>
+<ul>
+<li>string<br>该参数与当前的字符串参数一样，例如：</li>
+</ul>
+<figure class="highlight perl"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$template strtpl,<span class="string">"PRI: %pri%, MSG: %msg%\n"</span></span><br></pre></td></tr></table></figure>
+<p>请注意，列表模板在老版本中不可用，所以您需要使用复杂的属性替换器构造来完成复杂的事情。</p>
+<ul>
+<li>plugin</li>
+</ul>
+<p>这相当于“插件”类型 -type指令。 这里的参数是插件的名字，前面加了一个等号。 一个例子是：</p>
+<figure class="highlight gams"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta"><span class="meta-keyword">$template</span> plugintpl,=myplugin</span></span><br></pre></td></tr></table></figure>
+<h4 id="保留的模板名称"><a href="#保留的模板名称" class="headerlink" title="保留的模板名称"></a>保留的模板名称</h4><p>以“RSYSLOG_”开头的模板名称被保留用于rsyslog使用。一般不使用它们，否则可能会发生冲突（以及相当不可预知的行为）。您可以使用一小组预定义的模板，而无需对其进行定义：</p>
+<ul>
+<li>RSYSLOG_TraditionalFileFormat - 具有低精度时间戳的“旧式”默认日志文件格式</li>
+<li>RSYSLOG_FileFormat - 与传统文件格式类似的现代风格日志文件格式，具有高精度时间戳和时区信息</li>
+<li>RSYSLOG_TraditionalForwardFormat - 具有低精度时间戳的传统转发格式。如果您将消息发送到其他syslogd或rsyslogd版本3.12.5以下，则最有用。</li>
+<li>RSYSLOG_SysklogdFileFormat - sysklogd兼容的日志文件格式。如果使用选项：$ SpaceLFOnReceive on，$ EscapeControlCharactersOnReceive off，$ DropTrailingLFOnReception off，则日志格式将符合sysklogd日志格式。</li>
+<li>RSYSLOG_ForwardFormat - 与传统的高精度转发格式非常相似，但具有高精度时间戳和时区信息。建议在发送消息到rsyslog 3.12.5或更高版本时使用。</li>
+<li>RSYSLOG_SyslogProtocol23Format - IETF的Internet-draft ietf-syslog-protocol-23中指定的格式，它非常接近实际的系统日志标准RFC5424（当RFC5424最终获得批准时，我们无法更新此模板， ）。这种格式包括几个改进。您可以使用rsyslog或syslogd的所有相对较新版本的格式。</li>
+<li>RSYSLOG_DebugFormat - 用于解决属性问题的特殊格式。这种格式是为了写入日志文件。不要用于生产或远程转发。</li>
+</ul>
+<h4 id="老版本的基于字符串的模板样本"><a href="#老版本的基于字符串的模板样本" class="headerlink" title="老版本的基于字符串的模板样本"></a>老版本的基于字符串的模板样本</h4><p>本节提供了一些传统格式的默认模板，如第6版之前的rsyslog中所使用的。请注意，此格式仍受支持，因此不需要升级现有配置。 不过，强烈建议在制作新模板时不要使用旧版结构。 请注意，每个$ template语句都在一行中，但是可能会由于浏览器显示而在几行中断裂。<br>由空行分隔。 请记住，换行符在传统格式中很重要。</p>
+<figure class="highlight perl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$template FileFormat,<span class="string">"%TIMESTAMP:::date-rfc3339% %HOSTNAME% %syslogtag%%msg:::sp-if-no-1st-sp%%msg:::drop-last-lf%\n"</span></span><br><span class="line">$template TraditionalFileFormat,<span class="string">"%TIMESTAMP% %HOSTNAME% %syslogtag%%msg:::sp-if-no-1st-sp%%msg:::drop-last-lf%\n"</span></span><br><span class="line">$template ForwardFormat,<span class="string">"&lt;%PRI%&gt;%TIMESTAMP:::date-rfc3339% %HOSTNAME% %syslogtag:1:32%%msg:::sp-if-no-1st-sp%%msg%"</span></span><br><span class="line"><span class="string">$template TraditionalForwardFormat,"</span>&lt;%PRI%&gt;%TIMESTAMP% %HOSTNAME% %syslogtag:<span class="number">1</span>:<span class="number">32</span>%%msg:::sp-<span class="keyword">if</span>-<span class="keyword">no</span>-<span class="number">1</span>st-sp%%msg%"</span><br><span class="line">$template StdSQLFormat,<span class="string">"insert into SystemEvents (Message, Facility, FromHost, Priority, DeviceReportedTime, ReceivedAt, InfoUnitID, SysLogTag) values ('%msg%', %syslogfacility%, '%HOSTNAME%', %syslogpriority%, '%timereported:::date-mysql%', '%timegenerated:::date-mysql%', %iut%, '%syslogtag%')"</span>,SQL<span class="string">``</span></span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/rsyslog/" rel="tag"># rsyslog</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/10/01/rsyslog-v8学习笔记一-基本结构/" rel="next" title="rsyslog-v8学习笔记一(基本结构)">
+                <i class="fa fa-chevron-left"></i> rsyslog-v8学习笔记一(基本结构)
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/10/03/rsyslog-v8学习笔记三-Rsyslog属性/" rel="prev" title="rsyslog-v8学习笔记三(Rsyslog属性)">
+                rsyslog-v8学习笔记三(Rsyslog属性) <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.gif"
+                alt="devil" />
+            
+              <p class="site-author-name" itemprop="name">devil</p>
+              <p class="site-description motion-element" itemprop="description">Good Good Study！Day Day Up！</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">27</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">18</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/rss2.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/hanjh310" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#模板"><span class="nav-number">1.</span> <span class="nav-text">模板</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#模版处理"><span class="nav-number">1.1.</span> <span class="nav-text">模版处理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#template-语句"><span class="nav-number">1.2.</span> <span class="nav-text">template()语句</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#list"><span class="nav-number">1.2.1.</span> <span class="nav-text">list</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#subtree"><span class="nav-number">1.3.</span> <span class="nav-text">subtree</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#使用场景"><span class="nav-number">1.3.1.</span> <span class="nav-text">使用场景</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#字符串（string）"><span class="nav-number">1.4.</span> <span class="nav-text">字符串（string）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#plugin"><span class="nav-number">1.5.</span> <span class="nav-text">plugin</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#options"><span class="nav-number">1.6.</span> <span class="nav-text">options</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#范例"><span class="nav-number">1.7.</span> <span class="nav-text">范例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#老版本格式"><span class="nav-number">1.8.</span> <span class="nav-text">老版本格式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#保留的模板名称"><span class="nav-number">1.9.</span> <span class="nav-text">保留的模板名称</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#老版本的基于字符串的模板样本"><span class="nav-number">1.10.</span> <span class="nav-text">老版本的基于字符串的模板样本</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">devil</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.3</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://https-blog-loveops-org.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://blog.loveops.com/2016/10/02/rsyslog-v8学习笔记二-模板/';
+          this.page.identifier = '2016/10/02/rsyslog-v8学习笔记二-模板/';
+          this.page.title = 'rsyslog-v8学习笔记二(模板)';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://https-blog-loveops-org.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

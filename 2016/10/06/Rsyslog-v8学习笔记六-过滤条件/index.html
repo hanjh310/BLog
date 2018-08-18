@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="rsyslog," />
+
+
+
+
+
+  <link rel="alternate" href="/rss2.xml" title="LoveOps" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="过滤条件Rsyslog 提供四种类型的过滤条件：  “traditional” severity and facility based selectors（根据优先级和设施） property-based filters  expression-based filters BSD-style blocks (not u">
+<meta name="keywords" content="rsyslog">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Rsyslog-v8学习笔记六(过滤条件)">
+<meta property="og:url" content="http://blog.loveops.com/2016/10/06/Rsyslog-v8学习笔记六-过滤条件/index.html">
+<meta property="og:site_name" content="LoveOps">
+<meta property="og:description" content="过滤条件Rsyslog 提供四种类型的过滤条件：  “traditional” severity and facility based selectors（根据优先级和设施） property-based filters  expression-based filters BSD-style blocks (not upward compatible)  选择器选择器是过滤系统日志消息的传统方式。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-12-13T10:28:50.567Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Rsyslog-v8学习笔记六(过滤条件)">
+<meta name="twitter:description" content="过滤条件Rsyslog 提供四种类型的过滤条件：  “traditional” severity and facility based selectors（根据优先级和设施） property-based filters  expression-based filters BSD-style blocks (not upward compatible)  选择器选择器是过滤系统日志消息的传统方式。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://blog.loveops.com/2016/10/06/Rsyslog-v8学习笔记六-过滤条件/"/>
+
+
+
+
+
+  <title>Rsyslog-v8学习笔记六(过滤条件) | LoveOps</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">LoveOps</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Devil'Blog</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.loveops.com/2016/10/06/Rsyslog-v8学习笔记六-过滤条件/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="devil">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LoveOps">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Rsyslog-v8学习笔记六(过滤条件)</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-10-06T18:27:33+08:00">
+                2016-10-06
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/linux/" itemprop="url" rel="index">
+                    <span itemprop="name">linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2016/10/06/Rsyslog-v8学习笔记六-过滤条件/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2016/10/06/Rsyslog-v8学习笔记六-过滤条件/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  2,894
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  11
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="过滤条件"><a href="#过滤条件" class="headerlink" title="过滤条件"></a>过滤条件</h3><p>Rsyslog 提供四种类型的过滤条件：</p>
+<ul>
+<li>“traditional” severity and facility based selectors（根据优先级和设施）</li>
+<li>property-based filters </li>
+<li>expression-based filters</li>
+<li>BSD-style blocks (not upward compatible)</li>
+</ul>
+<h4 id="选择器"><a href="#选择器" class="headerlink" title="选择器"></a>选择器</h4><p>选择器是过滤系统日志消息的传统方式。它们被保留在rsyslog中，因为他们的原始语法是众所周知的，高效的，也需要与stock   syslogd配置文件兼容。如果您只需要根据优先级和设施进行筛选，则应该使用选择器线进行筛选。 它们为这项工作提供了最好的表现。</p>
+<p>选择器字段本身又由两部分组成，一个设施和一个优先级，由点号（“.”）隔开。这两个部分不区分大小写，也可以指定为十进制数字，但是最好不药这样做，会有警告信息 syslog（3）中描述了设施和优先级。下面提到的名称对应于/usr/include/syslog.h中类似的LOG_values。</p>
+<p>设施必须是以下关键字之一：</p>
+<ul>
+<li>auth </li>
+<li>authpriv </li>
+<li>cron </li>
+<li>daemon</li>
+<li>kern </li>
+<li>lpr</li>
+<li>mail </li>
+<li>mark</li>
+<li>news</li>
+<li>security (same as auth)</li>
+<li>syslog</li>
+<li>user</li>
+<li>uucp</li>
+<li>local0-local7<br>关键字security不应该再使用，mark仅供内部使用，因此不应在应用程序中使用。 无论如何，你可能想在这里指定和重定向这些消息。该工具指定产生该消息的子系统，即，如果使用syslog登录，则所有的邮件程序都将使用邮件工具（LOG_MAIL）进行登录。</li>
+</ul>
+<p>优先级是以下关键字之一，按升序排列：</p>
+<ul>
+<li>debug</li>
+<li>info</li>
+<li>notice</li>
+<li>warning</li>
+<li>warn（与warning相同）</li>
+<li>err</li>
+<li>error（与err相同</li>
+<li>cirt</li>
+<li>alter</li>
+<li>emerg</li>
+<li>panic（与emerg相同）</li>
+</ul>
+<p>关键字error、 warn and panic已被弃用，不应再使用。 优先级定义了消息的严重程度。</p>
+<p>原BSD syslogd的行为是根据给定的动作记录所有指定优先级和更高优先级的消息。 Rsyslogd表现相同，但有一些扩展。</p>
+<p>除上述名称外，rsyslogd（8）还可以理解以下扩展：星号（“*”）代表所有设施或所有优先级，具体取决于它在何处使用（在期间之前或之后）。 关键字none表示给定设施没有优先权。 您可以使用逗号（“，”）运算符在一个语句中指定具有相同优先级模式的多个工具。 你可以指定尽可能多的需要的设施。请记住，只有来自这样的声明的设施部分被采取，优先部分将被跳过。</p>
+<p>可以使用分号（“;”）分隔符为单个动作指定多个选择器。 请记住，选择器字段中的每个选择器都可以覆盖前面的选择器。 使用这种行为，你可以从模式中排除一些优先级。</p>
+<p>Rsyslogd具有原始BSD源语法扩展，使其更直观。 您可以在每个优先级之前加上等号（“=”）来指定这个优先级，而不是上面的任何一个。 你也可以（都是有效的）在优先级之前用一个感叹号（“！”）来忽略所有的优先级，或者确切地说这个或者这个以及任何更高的优先级。 如果您使用两个扩展名，而感叹号必须在等号之前出现，请直观地使用它。</p>
+<h4 id="基于属性的过滤器"><a href="#基于属性的过滤器" class="headerlink" title="基于属性的过滤器"></a>基于属性的过滤器</h4><p>基于属性的过滤器对rsyslogd是唯一的。 他们允许过滤任何属性，如HOSTNAME，syslogtag和msg。 所有当前支持的属性的列表可以在property replacer documentation中找到（但请记住只有属性，而不支持替换器）。 使用此过滤器，可以使用指定的比较操作，针对指定的值检查每个属性。</p>
+<p>基于属性的过滤器必须以冒号开头。这告诉rsyslogd它是新的过滤器类型。 冒号后面必须跟着属性名称，逗号，比较操作的名称执行，另一个逗号，然后是比较的值。 这个值必须被引用。 逗号之间可以有空格和制表符。 属性名称和比较操作区分大小写，所以“msg”起作用，而“MSG”是一个无效的属性名称。 简言之，语法如下：</p>
+<figure class="highlight crmsh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">:<span class="keyword">property</span><span class="title"></span>, [!]compare-operation, <span class="string">"value"</span></span><br></pre></td></tr></table></figure>
+<h4 id="比较的操作"><a href="#比较的操作" class="headerlink" title="比较的操作"></a>比较的操作</h4><p>目前支持以下比较操作：</p>
+<ul>
+<li>contains</li>
+</ul>
+<p>检查字符串中是否包含指定的值。 必须有完全匹配，不支持通配符。</p>
+<ul>
+<li>sequal</li>
+</ul>
+<p>比较提供的“值”字符串和属性内容是否完全相等。 与contains的区别在于包含只要在属性值内任何位置搜索到即可，而对于isequal必须是王权相同的。 因此，isequal对于像syslogtag或者FROMHOST这样的领域是非常有用的，你可能知道确切的内容。</p>
+<ul>
+<li>startswith</li>
+</ul>
+<p>检查指定值是否刚好是属性值的开始。 例如，如果您搜索“val”</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">:msg</span>, startswith, <span class="string">"val"</span></span><br></pre></td></tr></table></figure>
+<p>“values are in this message”将匹配到，而“There are values in this message”将匹配不到，但是后者能匹配“contains”。<br>请注意，“startswith”比正则表达式要快得多。 所以即使一旦实施，使用“startswith”也可能会有很大的意义（性能方面）。</p>
+<ul>
+<li>regex<br>将该属性与提供的POSIX BRE正则表达式进行比较。</li>
+<li>ereregex<br>将该属性与提供的POSIX ERE正则表达式进行比较。</li>
+</ul>
+<p>你可以在比较操作之前使用感叹号（！），这个操作的结果是否定的。 例如，如果msg包含“This is a informative message”，下面的示例将不匹配：</p>
+<figure class="highlight applescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">:msg, <span class="keyword">contains</span>, <span class="string">"error"</span></span><br></pre></td></tr></table></figure>
+<p>这个是匹配的:</p>
+<figure class="highlight applescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">:msg, !<span class="keyword">contains</span>, <span class="string">"error"</span></span><br></pre></td></tr></table></figure>
+<p>如果您想要进行一些通用处理但排除某些特定事件，则使用否定可能很有用。 您可以结合使用丢弃操作。 比如：</p>
+<figure class="highlight applescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">*.* /var/<span class="built_in">log</span>/allmsgs-including-informational.<span class="built_in">log</span></span><br><span class="line">:msg, <span class="keyword">contains</span>, <span class="string">"informational"</span>  ~</span><br><span class="line">*.* /var/<span class="built_in">log</span>/allmsgs-<span class="keyword">but</span>-informational.<span class="built_in">log</span></span><br></pre></td></tr></table></figure>
+<p>不要忽略第2行的”~”符号, 在这个例子中，所有的消息都被写入文件allmsgs-including-informational.log。 然后，包含字符串“informational”的所有消息都被丢弃。 这意味着“丢弃行”下方的配置文件行（我们示例中的编号2）将不会应用于此消息。 然后，所有剩余的行也将写入文件allmsgs-but-informational.log。</p>
+<h4 id="Value-Part"><a href="#Value-Part" class="headerlink" title="Value Part"></a>Value Part</h4><p>值是一个带引号的字符串。 它支持一些转义序列：</p>
+<p>\” - 双引号 (e.g. “String with \”Quotes\””)<br>\ - 反斜线 (e.g. “C:\tmp”)<br>转义序列始终以反斜杠开始。 反斜杠字符必须转义。 那么上面列出的任何其他序列是无效的，并可能导致不可预知的结果。</p>
+<p>可能“msg”是基于属性过滤器最突出的用例。 这是实际的消息文本。 如果您想根据某些消息内容（例如特定代码的存在）进行过滤，则可以通过以下方式轻松完成此操作：</p>
+<figure class="highlight applescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">:msg, <span class="keyword">contains</span>, <span class="string">"ID-4711"</span></span><br></pre></td></tr></table></figure>
+<p>当消息包含字符串“ID-4711”时，该过滤器将匹配。 请注意，比较区分大小写，所以如果消息中包含“id-4711”，则不匹配。</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">:msg</span>, regex, <span class="string">"fatal .* error"</span></span><br></pre></td></tr></table></figure>
+<p>此过滤器使用POSIX正则表达式。 当字符串包含“fatal”和“error”之间的任何内容（例如e.g. “fatal net error” 和 “fatal lib error” 但是 “fatal error”不行，因为正则表达式需要两个空格！</p>
+<p>正确获取基于属性过滤器有时可能具有挑战性。 为了帮助您尽可能地做到这一点，rsyslogd在评估过程中为所有基于属性的过滤器吐出调试信息。 要启用它，请在前台运行rsyslogd并指定“-d”选项。</p>
+<p>基于属性的过滤器中目前不支持布尔运算‘message contains “ID17” or message contains “ID18”’）（除了上面的“not”外）。 请注意，虽然可以通过基于属性的过滤器来查询设施和严重性，但对于这些情况，使用经典选择器（参见上文）更为明智。</p>
+<h4 id="基于表达式的筛选器"><a href="#基于表达式的筛选器" class="headerlink" title="基于表达式的筛选器"></a>基于表达式的筛选器</h4><p>基于表达式的过滤器允许对任意复杂表达式进行过滤，包括布尔，算术和字符串操作。 表达式过滤器将演变成完整的配置脚本语言。 不幸的是，他们的语法在这个过程中会稍微改变。 所以如果你现在使用它们，你需要准备在一段时间后改变你的配置文件。 但是，我们尽可能快地实施脚本功能（也就是所需的阶段性工作）。 所以曝光时间可能不会太长。</p>
+<p>基于表达式的过滤器在新行的第1列中用关键字“if”表示。 他们有这样的格式：</p>
+<figure class="highlight livecodeserver"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> expr <span class="keyword">then</span> action-part-<span class="keyword">of</span>-selector-<span class="built_in">line</span></span><br></pre></td></tr></table></figure>
+<p>“if”和“then”是必须存在的固定关键字。 “expr”是一个（可能相当复杂的）表达式。 请查看expression documentation 。“action-part-of-selector-line”是一个动作，就像你所知道的那样（例如 “/var/log/logfile” to write to that file）。</p>
+<h4 id="BSD风格-Blocks"><a href="#BSD风格-Blocks" class="headerlink" title="BSD风格 Blocks"></a>BSD风格 Blocks</h4><p>注意：由于技术原因，rsyslog v7 +不再支持BSD风格的blocks。所以强烈建议不要使用它们。</p>
+<p>Rsyslogd在rsyslog.conf中支持BSD风格的blocks。通过程序或主机名规范将每一行的blocks与先前的blocks分离。一个blocks只会记录对应于给定的最新程序和主机名规范的消息。因此，一个选择“ppp”作为程序的blocks，紧接着是一个从主机名“dialhost”中选择消息的blcoks，然后第二个blocks将只在dialhost上记录来自ppp程序的消息。</p>
+<p>程序规范是以’!prog’开始的行，下面的blocks将与来自该特定程序的syslog调用相关联。 “foo”的程序规范也将匹配内核记录的任何以“foo：”为前缀的消息。或者，程序规范“-foo”会使以下块应用于来自除指定程序之外的任何程序的消息。 “+ hostname”形式的主机名规范以及以下块将应用于从指定主机名接收到的消息。或者，主机名规范“-hostname”会使以下块应用于来自任何主机但指定的主机的消息。如果主机名称为“@”，则将使用本地主机名称。 （尚未实现）通过将程序或主机名称设置为“*”，可以重置程序或主机名称规范。</p>
+<p>请注意，rsyslogd不支持BSD syslogd中的“#!prog”，“＃+ hostname”和“＃-hostname”语法。默认情况下，不设置主机名或程序。</p>
+<h4 id="实例"><a href="#实例" class="headerlink" title="实例"></a>实例</h4><figure class="highlight applescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">*.* /var/<span class="built_in">log</span>/file1 <span class="comment"># the traditional way</span></span><br><span class="line"><span class="keyword">if</span> $msg <span class="keyword">contains</span> '<span class="keyword">error</span>' <span class="keyword">then</span> /var/<span class="built_in">log</span>/errlog <span class="comment"># the expression-based way</span></span><br></pre></td></tr></table></figure>
+<p>现在，如果您想检查设施和严重性，则需要指定数值。 这些可以在RFC 5424中找到。如果你不喜欢，你当然也可以使用文本属性 - 只要确保使用正确的。 随着表达的支持增强，这将会改变。 例如，如果要过滤具有设备local0的消息，请以“DEVNAME”开头，并在其消息内容中包含“error1”或“error0”，您可以使用以下过滤器：</p>
+<figure class="highlight autoit"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> $syslogfacility-text == <span class="string">'local0'</span> <span class="literal">and</span> $msg startswith <span class="string">'DEVNAME'</span> <span class="literal">and</span> ($msg contains <span class="string">'error1'</span> <span class="literal">or</span> $msg contains <span class="string">'error0'</span>) <span class="keyword">then</span> /var/<span class="built_in">log</span>/somelog</span><br></pre></td></tr></table></figure>
+<p>请注意，以上都必须在一行！ 如果你想存储除了那些包含“error1”或“error0”的消息，你只需要添加一个“not”：</p>
+<figure class="highlight autoit"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> $syslogfacility-text == <span class="string">'local0'</span> <span class="literal">and</span> $msg startswith <span class="string">'DEVNAME'</span> <span class="literal">and</span> <span class="literal">not</span> ($msg contains <span class="string">'error1'</span> <span class="literal">or</span> $msg contains <span class="string">'error0'</span>) <span class="keyword">then</span> /var/<span class="built_in">log</span>/somelog</span><br></pre></td></tr></table></figure>
+<p>如果您想进行不区分大小写的比较，请使用“contains_i”和“startswith_i”而不是“contains”和“startswith”。 请注意，基于表达式的过滤器目前不支持正则表达式。 当函数支持被添加到表达式引擎时，这些将被添加（原因是正则表达式将是一个单独的可加载模块，这需要更多的前提条件才能实现）。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/rsyslog/" rel="tag"># rsyslog</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/10/05/Rsyslog-v8学习笔记五-Property-Replacer不匹配模式/" rel="next" title="Rsyslog-v8学习笔记五(Property Replacer不匹配模式)">
+                <i class="fa fa-chevron-left"></i> Rsyslog-v8学习笔记五(Property Replacer不匹配模式)
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/10/07/Rsyslog-v8学习笔记七-RainerScript/" rel="prev" title="Rsyslog-v8学习笔记七(RainerScript)">
+                Rsyslog-v8学习笔记七(RainerScript) <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.gif"
+                alt="devil" />
+            
+              <p class="site-author-name" itemprop="name">devil</p>
+              <p class="site-description motion-element" itemprop="description">Good Good Study！Day Day Up！</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">27</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">18</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/rss2.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/hanjh310" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#过滤条件"><span class="nav-number">1.</span> <span class="nav-text">过滤条件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#选择器"><span class="nav-number">1.1.</span> <span class="nav-text">选择器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#基于属性的过滤器"><span class="nav-number">1.2.</span> <span class="nav-text">基于属性的过滤器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#比较的操作"><span class="nav-number">1.3.</span> <span class="nav-text">比较的操作</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Value-Part"><span class="nav-number">1.4.</span> <span class="nav-text">Value Part</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#基于表达式的筛选器"><span class="nav-number">1.5.</span> <span class="nav-text">基于表达式的筛选器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#BSD风格-Blocks"><span class="nav-number">1.6.</span> <span class="nav-text">BSD风格 Blocks</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#实例"><span class="nav-number">1.7.</span> <span class="nav-text">实例</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">devil</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.3</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://https-blog-loveops-org.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://blog.loveops.com/2016/10/06/Rsyslog-v8学习笔记六-过滤条件/';
+          this.page.identifier = '2016/10/06/Rsyslog-v8学习笔记六-过滤条件/';
+          this.page.title = 'Rsyslog-v8学习笔记六(过滤条件)';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://https-blog-loveops-org.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

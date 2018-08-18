@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="rsyslog," />
+
+
+
+
+
+  <link rel="alternate" href="/rss2.xml" title="LoveOps" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="Rsyslog属性rsyslog中的数据项称为“属性”。 他们可以有不同的起源。 最重要的是那些源于收到的消息。 但也有其他的。 无论何时您想要访问数据项目，都需要访问相应的属性。属性名称不区分大小写（在3.17.0之前，区分大小写）。属性用于：  模板 条件语句  message属性这些由rsyslog解析器从原始消">
+<meta name="keywords" content="rsyslog">
+<meta property="og:type" content="article">
+<meta property="og:title" content="rsyslog-v8学习笔记三(Rsyslog属性)">
+<meta property="og:url" content="http://blog.loveops.com/2016/10/03/rsyslog-v8学习笔记三-Rsyslog属性/index.html">
+<meta property="og:site_name" content="LoveOps">
+<meta property="og:description" content="Rsyslog属性rsyslog中的数据项称为“属性”。 他们可以有不同的起源。 最重要的是那些源于收到的消息。 但也有其他的。 无论何时您想要访问数据项目，都需要访问相应的属性。属性名称不区分大小写（在3.17.0之前，区分大小写）。属性用于：  模板 条件语句  message属性这些由rsyslog解析器从原始消息中提取。所有消息属性都以字母开头。以下是存在的消息属性：  msg消息的MSG">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-12-12T14:15:21.730Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="rsyslog-v8学习笔记三(Rsyslog属性)">
+<meta name="twitter:description" content="Rsyslog属性rsyslog中的数据项称为“属性”。 他们可以有不同的起源。 最重要的是那些源于收到的消息。 但也有其他的。 无论何时您想要访问数据项目，都需要访问相应的属性。属性名称不区分大小写（在3.17.0之前，区分大小写）。属性用于：  模板 条件语句  message属性这些由rsyslog解析器从原始消息中提取。所有消息属性都以字母开头。以下是存在的消息属性：  msg消息的MSG">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://blog.loveops.com/2016/10/03/rsyslog-v8学习笔记三-Rsyslog属性/"/>
+
+
+
+
+
+  <title>rsyslog-v8学习笔记三(Rsyslog属性) | LoveOps</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">LoveOps</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Devil'Blog</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.loveops.com/2016/10/03/rsyslog-v8学习笔记三-Rsyslog属性/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="devil">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LoveOps">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">rsyslog-v8学习笔记三(Rsyslog属性)</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-10-03T22:14:18+08:00">
+                2016-10-03
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/linux/" itemprop="url" rel="index">
+                    <span itemprop="name">linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2016/10/03/rsyslog-v8学习笔记三-Rsyslog属性/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2016/10/03/rsyslog-v8学习笔记三-Rsyslog属性/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  2,113
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  8
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h4 id="Rsyslog属性"><a href="#Rsyslog属性" class="headerlink" title="Rsyslog属性"></a>Rsyslog属性</h4><p>rsyslog中的数据项称为“属性”。 他们可以有不同的起源。 最重要的是那些源于收到的消息。 但也有其他的。 无论何时您想要访问数据项目，都需要访问相应的属性。属性名称不区分大小写（在3.17.0之前，区分大小写）。<br>属性用于：</p>
+<ul>
+<li>模板</li>
+<li>条件语句</li>
+</ul>
+<h5 id="message属性"><a href="#message属性" class="headerlink" title="message属性"></a>message属性</h5><p>这些由rsyslog解析器从原始消息中提取。所有消息属性都以字母开头。<br>以下是存在的消息属性：</p>
+<ul>
+<li>msg<br>消息的MSG部分（又名“消息”;））</li>
+<li>rawmsg<br>消息原样。应该对调试有用，消息完全没有改变。请注意，EscapecontrolCharactersOnReceive是默认启用的，所以它可能与套接字中收到的不同。</li>
+<li>rawmsg-after-pri<br>与rawmsg几乎相同，但系统日志PRI被删除。如果不存在PRI，则rawmsg-after-pri与rawmsg相同。请注意，系统日志PRI是标题字段，其中包含有关syslog设施和严重性的信息。它被包含在”&lt;&gt;”中，例如“<191>”。这个字段通常不会写入日志文件，但通常需要让接收者正确分类消息。有一些罕见的情况下，需要原始信息，但不是PRI。您可以使用此属性来获取该属性。一般来说，你应该知道你需要这种格式，否则远离财产。</191></li>
+<li>hostname<br>消息的主机名</li>
+<li>source<br>hostname的别名</li>
+<li>fromhost<br>消息来源的主机名（在中继链中，这是紧挨着我们而不一定是原始发送者的系统）。这是DNS解析的名称，除非DNS解析已被禁用。</li>
+<li>fromhost-ip<br>与fromhost相同，但始终作为IP地址。本地输入（如imklog）在此属性中使用127.0.0.1。</li>
+<li>syslogtag<br>TAG来自消息</li>
+<li>programname<br>标记的“static”部分，由BSD syslogd定义。例如，当TAG是“named[12345]”时，程序名是“named”。<br>确切地说，程序名是由（以先发生者为准）终止：</li>
+</ul>
+<figure class="highlight haml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">-<span class="ruby"> <span class="keyword">end</span> of tag</span></span><br><span class="line"><span class="ruby">- nonprintable character</span></span><br><span class="line"><span class="ruby">- “：”</span></span><br><span class="line"><span class="ruby">- “[”</span></span><br><span class="line"><span class="ruby">- “/”</span></span><br></pre></td></tr></table></figure>
+<p>上面的定义是由FreeBSD的syslogd定义的</p>
+<p>请注意，一些应用程序在标签的静态部分包括斜线，例如“app/ foo[1234]”。在这种情况下，程序名是“app”。如果是绝对路径像“/app/foo [1234]”，则程序名将变为空（“”）。如果您需要将斜杠作为程序名的一部分，则可以使用全局选项</p>
+<figure class="highlight applescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">global</span>(parser.permitSlashInProgramName=”<span class="keyword">on</span>”)</span><br></pre></td></tr></table></figure>
+<p>开启以后，“/app/foo[1234]”的syslogtag将“/app/ foo”作为程序名。注意：此选项从rsyslogd版本8.25.0开始可用。</p>
+<ul>
+<li>pri<br>消息的PRI部分 - 未解码（单个值）</li>
+<li>pri-text<br>消息的PRI部分以文本形式，括号中附有数字PRI（例如“local0.err <133>”）</133></li>
+<li>iut<br>monitorware InfoUnitType - 与MonitorWare后端交谈时使用（也适用于Adiscon LogAnalyzer）</li>
+<li>syslogfacility<br>消息中的设施 - 以数字形式</li>
+<li>syslogfacility-text<br>消息中的设施 - 以文本形式</li>
+<li>syslogseverity<br>来自消息的严重性 - 以数字形式</li>
+<li>syslogseverity-text<br>来自消息的严重性 - 以文本形式</li>
+<li>syslogpriority<br>syslogseverity的别名 - 包含历史原因（小心：它仍然是严重性，不是PRI！）</li>
+<li>syslogpriority-text<br>syslogseverity-text的别名</li>
+<li>timegenerated<br>邮件收到时的时间戳。始终在高分辨率</li>
+<li>timereported<br>来自消息的时间戳。分辨率取决于消息中提供的内容（大多数情况下只有几秒钟）</li>
+<li>timestamp<br>时间报告的别名</li>
+<li>protocol-version<br>IETF draft-ietf-syslog-protcol草案中的PROTCOL-VERSION字段的内容</li>
+<li>structured-data<br>IETF草案draft-ietf-syslog-protocol中的STRUCTURED-DATA字段的内容</li>
+<li>app-name<br>IETF draft-ietf-syslog-protocol中APP-NAME字段的内容</li>
+<li>procid<br>IETF草稿draft-ietf-syslog-protocol中的PROCID字段的内容</li>
+<li>msgid<br>IETF草案draft-ietf-syslog-protocol中的MSGID字段的内容</li>
+<li>inputname<br>生成消息的输入模块的名称（例如“imuxsock”，“imudp”）。请注意，并非所有模块都必须提供此属性。如果没有提供，它是一个空字符串。还要注意，输入模块可以提供任何喜欢的值。最重要的是，它不一定是模块的输入名称。内部来源也可以提供输入名称。目前，“rsyslogd”被定义为由rsyslogd内部生成的消息的输入名称，例如启动和关闭以及错误消息。当尝试根据消息来源过滤消息时，该属性被认为是有用的，例如，本地生成的消息（“rsyslogd”，“imuxsock”，“imklog”）应该到别处生成的消息到不同的地方。</li>
+<li>jsonmesg</li>
+</ul>
+<p>自rsyslog 8.3.0起可用,整个消息对象作为JSON表示。请注意，JSON字符串将不包含LF，它将包含此处指定为各自JSON容器的所有其他消息属性。 它还包含“$！”subtree中的所有消息变量（如果不存在，则可能为空）。</p>
+<p>这个属性主要是作为一个接口到其他系统和工具，想要访问完整的属性集（即外部插件）。 请注意，它可能会多次包含相同的数据项。 例如，syslog标签的一部分将被包含在rawmsg，syslogtag和programname属性中。 因此，这个属性有一些额外的开销。 因此，建议仅在实际需要时才使用。</p>
+<h4 id="系统属性"><a href="#系统属性" class="headerlink" title="系统属性"></a>系统属性</h4><p>这些属性由rsyslog核心引擎提供。它们与消息无关。所有系统属性都以美元符号开始。</p>
+<p>需要特别注意与时间相关的系统变量：</p>
+<ul>
+<li>timereported 包含消息头中包含的时间戳。理想情况下，它类似于在原始发件人创建邮件的时间。根据信息在中继链中的时间长短，这可能是相当古老的。</li>
+<li>timegenerated 包含本地系统收到消息时的时间戳。这里“收到”实际上是指消息从操作系统移交给rsyslog的接收缓冲区的时间点，但在进行任何实际处理之前。这也意味着一条消息在被放入任何队列之前被“接收”。请注意，取决于输入，可能会发生一些最小的处理，例如从接收缓冲区中提取实际的消息内容。如果通过相同的接收缓冲区接收多个消息（例如基于TCP的syslog的常见情况），则它们具有相同的时间生成标记，因为它们实际上是同时接收的。</li>
+<li>$now 不是来自消息。是处理消息的是系统时间。timegenerated和$now总是有小的差别，因为处理总是在接收之后发生。如果消息位于本地系统的队列中，那么两个消息之间的时间差可以是几秒钟（例如，由于消息突发和内存中的排队），消息在如果磁盘队列中，极端情况下时间差甚至是几小时，（例如由于数据库中断）。 timereported属性通常比timegenerated更早，但由于系统之间的时间和时区配置的差异，可能会完全不同。<br>以下系统属性存在：</li>
+</ul>
+<p>$ BOM<br>UTF-8编码的Unicode字节顺序掩码（BOM）。当字符集被认为是Unicode时，这在RFC5424支持的模板中可能是有用的。<br>$ myhostname<br>当前主机的名称，因为它知道自己（可能有用于通用的方式过滤）</p>
+<h4 id="时间相关系统属性"><a href="#时间相关系统属性" class="headerlink" title="时间相关系统属性"></a>时间相关系统属性</h4><p>所有这些时间系统属性都以本地时间变量（例如$ now）和UTC时间衍生出来的（例如$ now-utc）存在。 UTC变体始终可以通过追加“-utc”来使用。 请注意，在单个模板中，只能使用本地时间或UTC变量。 尽管可以在一个模板中混合两个变体，但不能保证它们提供的时间完全相同。 技术上的原因是rsyslog需要重新查询系统时间。 因此，我们强烈建议不要在同一个模板中混合两个变体。</p>
+<p>请注意，在不同模板中使用将在每个模板中生成一致的时间戳。 但是，由于$now 在使用时总是提供本地系统时间，因此时间可能会提前，因此不同的模板可能具有不同的时间戳。 为了避免这种情况，请使用timegenerated。</p>
+<ul>
+<li>$now<br>当前日期标记，格式为YYYY-MM-DD</li>
+<li>$year<br>当年 (4位数)</li>
+<li>$month<br>当月 (2位数)</li>
+<li>$day<br>当月的当天 (2位数)</li>
+<li>$hour<br>当前的（24小时）时间（2位数）</li>
+<li>$hhour<br>我们现在的半个小时。从0分到29分，从30分到59分总是1。</li>
+<li>$qhour<br>四分之一时间，很像$ HHOUR，但是取值范围从0到3（相当于一小时4刻钟）</li>
+<li>$minute<br>当前分钟（2位）</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/rsyslog/" rel="tag"># rsyslog</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/10/02/rsyslog-v8学习笔记二-模板/" rel="next" title="rsyslog-v8学习笔记二(模板)">
+                <i class="fa fa-chevron-left"></i> rsyslog-v8学习笔记二(模板)
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/10/04/Rsyslog-v8学习笔记四-属性替换器/" rel="prev" title="Rsyslog-v8学习笔记四(属性替换器)">
+                Rsyslog-v8学习笔记四(属性替换器) <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.gif"
+                alt="devil" />
+            
+              <p class="site-author-name" itemprop="name">devil</p>
+              <p class="site-description motion-element" itemprop="description">Good Good Study！Day Day Up！</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">27</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">18</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/rss2.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/hanjh310" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#Rsyslog属性"><span class="nav-number">1.</span> <span class="nav-text">Rsyslog属性</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#message属性"><span class="nav-number">1.1.</span> <span class="nav-text">message属性</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#系统属性"><span class="nav-number">2.</span> <span class="nav-text">系统属性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#时间相关系统属性"><span class="nav-number">3.</span> <span class="nav-text">时间相关系统属性</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">devil</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.3</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://https-blog-loveops-org.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://blog.loveops.com/2016/10/03/rsyslog-v8学习笔记三-Rsyslog属性/';
+          this.page.identifier = '2016/10/03/rsyslog-v8学习笔记三-Rsyslog属性/';
+          this.page.title = 'rsyslog-v8学习笔记三(Rsyslog属性)';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://https-blog-loveops-org.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

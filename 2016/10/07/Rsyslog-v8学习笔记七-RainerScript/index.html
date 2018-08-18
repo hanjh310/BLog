@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="rsyslog," />
+
+
+
+
+
+  <link rel="alternate" href="/rss2.xml" title="LoveOps" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="RainerScriptRainerScript是一种特别设计的脚本语言，非常适合处理网络事件和配置事件处理器。 它是用于rsyslog的主要配置语言。 请注意，RainerScript可能不会被当作rscript，因为这是别人的商标。从rsyslog 3.12.0开始，开始慢慢支持RainerScript（支持exp">
+<meta name="keywords" content="rsyslog">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Rsyslog-v8学习笔记七(RainerScript)">
+<meta property="og:url" content="http://blog.loveops.com/2016/10/07/Rsyslog-v8学习笔记七-RainerScript/index.html">
+<meta property="og:site_name" content="LoveOps">
+<meta property="og:description" content="RainerScriptRainerScript是一种特别设计的脚本语言，非常适合处理网络事件和配置事件处理器。 它是用于rsyslog的主要配置语言。 请注意，RainerScript可能不会被当作rscript，因为这是别人的商标。从rsyslog 3.12.0开始，开始慢慢支持RainerScript（支持expression）， 在第5版中，支持“if … then”语句。 从rsyslo">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-12-15T09:05:10.796Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Rsyslog-v8学习笔记七(RainerScript)">
+<meta name="twitter:description" content="RainerScriptRainerScript是一种特别设计的脚本语言，非常适合处理网络事件和配置事件处理器。 它是用于rsyslog的主要配置语言。 请注意，RainerScript可能不会被当作rscript，因为这是别人的商标。从rsyslog 3.12.0开始，开始慢慢支持RainerScript（支持expression）， 在第5版中，支持“if … then”语句。 从rsyslo">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://blog.loveops.com/2016/10/07/Rsyslog-v8学习笔记七-RainerScript/"/>
+
+
+
+
+
+  <title>Rsyslog-v8学习笔记七(RainerScript) | LoveOps</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">LoveOps</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Devil'Blog</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.loveops.com/2016/10/07/Rsyslog-v8学习笔记七-RainerScript/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="devil">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LoveOps">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Rsyslog-v8学习笔记七(RainerScript)</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-10-07T17:04:21+08:00">
+                2016-10-07
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/linux/" itemprop="url" rel="index">
+                    <span itemprop="name">linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2016/10/07/Rsyslog-v8学习笔记七-RainerScript/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2016/10/07/Rsyslog-v8学习笔记七-RainerScript/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  9,809
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  37
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="RainerScript"><a href="#RainerScript" class="headerlink" title="RainerScript"></a>RainerScript</h3><p>RainerScript是一种特别设计的脚本语言，非常适合处理网络事件和配置事件处理器。 它是用于rsyslog的主要配置语言。 请注意，RainerScript可能不会被当作rscript，因为这是别人的商标。<br>从rsyslog 3.12.0开始，开始慢慢支持RainerScript（支持expression），<br> 在第5版中，支持“if … then”语句。 从rsyslog v6开始，基本达到全部支持。</p>
+<h4 id="Data-Types-（数据类型）"><a href="#Data-Types-（数据类型）" class="headerlink" title="Data Types （数据类型）"></a>Data Types （数据类型）</h4><p>RainerScript是一种无类型的语言。 这并不意味着你不需要关心类型。 当然，像“A”+“B”这样的表达式不会返回一个有效的结果，因为你不能真的添加两个字母（连接它们，使用连接运算符＆）。 但是，所有类型的转换都是由脚本解释器在需要时自动完成的。</p>
+<h4 id="Expressions-（表达式）"><a href="#Expressions-（表达式）" class="headerlink" title="Expressions （表达式）"></a>Expressions （表达式）</h4><p>该语言支持任意复杂的表达式。 所有常用的操作符都支持。 操作的优先级如下（列表中较低的操作在列表中较高，例如在添加之前进行乘法。</p>
+<figure class="highlight applescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">expressions <span class="keyword">in</span> parenthesis</span><br><span class="line"><span class="keyword">not</span>, unary minus</span><br><span class="line">*, /, % (modulus, <span class="keyword">as</span> <span class="keyword">in</span> C)</span><br><span class="line">+, -, &amp; (<span class="built_in">string</span> concatenation)</span><br><span class="line">==, !=, &lt;&gt;, &lt;, &gt;, &lt;=, &gt;=, <span class="keyword">contains</span> (strings!), startswith (strings!)</span><br><span class="line"><span class="keyword">and</span></span><br><span class="line"><span class="keyword">or</span></span><br></pre></td></tr></table></figure>
+<p>例如, “not a == b” 返回的不是你想药的结果. 脚本处理器首先处理“not a” 并把返回的布尔值和b比较. 你需要的可能 “not (a == b)”. 你只是想测试两个值是否相等 , 建议用 “!=” 或者 “&lt;&gt;”. 两个效果相等，用哪个根据自己的喜好，所有测试a和b是否相等，应该用“a &lt;&gt; b”.  “not” 运算符在比较表达式中也可以形成复杂的布尔表达式， 在这种情况下，最好用括号。</p>
+<h4 id="functions"><a href="#functions" class="headerlink" title="functions"></a>functions</h4><ul>
+<li>getenv(str)</li>
+</ul>
+<p>像OS调用一样，返回环境变量的值（如果存在）。 如果不存在，则返回空字符串。<br>以下示例可用于基于某个环境变量构建动态过滤器：</p>
+<figure class="highlight autoit"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> $msg contains getenv(<span class="string">'TRIGGERVAR'</span>) <span class="keyword">then</span> /path/<span class="keyword">to</span>/errfile</span><br></pre></td></tr></table></figure>
+<ul>
+<li>strlen(str)</li>
+</ul>
+<p>返回提供字符串长度</p>
+<ul>
+<li>tolower(str)</li>
+</ul>
+<p>将提供的字符串转换为小写</p>
+<ul>
+<li>cstr(expr)</li>
+</ul>
+<p>将expr转换为字符串值</p>
+<ul>
+<li>cnum(expr)</li>
+</ul>
+<p>将expr转换为数字（整数）注：如果表达式不包含数值，则行为是未定义的。</p>
+<ul>
+<li>wrap(str, wrapper_str)</li>
+</ul>
+<p>返回由wrapper_str包装的str。 例如。</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="title">wrap</span><span class="params">(<span class="string">"foo bar"</span>, <span class="string">"##"</span>)</span></span></span><br></pre></td></tr></table></figure>
+<p>结果：</p>
+<figure class="highlight livescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"#<span class="subst">#foo</span> bar##"</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>wrap(str, wrapper_str, escaper_str)<br>返回由wrapper_str包装的str。 但是另外，任何出现在str中的wrapper_str都将被escaper_str替换。 例如。</li>
+</ul>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="title">wrap</span><span class="params">(<span class="string">"foo'bar"</span>, <span class="string">"'"</span>, <span class="string">"_"</span>)</span></span></span><br></pre></td></tr></table></figure>
+<p>结果：</p>
+<figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"'foo_bar'"</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>replace(str, substr_to_replace, replace_with)<br>将所有substr_to_replace实例替换为replace_with的新字符串。 例如。</li>
+</ul>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="title">replace</span><span class="params">(<span class="string">"foo bar baz"</span>, <span class="string">" b"</span>, <span class="string">", B"</span>)</span></span></span><br></pre></td></tr></table></figure>
+<p>结果</p>
+<figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"foo, Bar, Baz"</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>re_match(expr, re)</li>
+</ul>
+<p>返回1，如果expr匹配re，否则返回0。 使用POSIX ERE。</p>
+<ul>
+<li>re_extract(expr, re, match, submatch, no-found)</li>
+</ul>
+<p>通过正则表达式匹配从字符串（属性）提取数据。 使用POSIX ERE正则表达式。 变量“match”包含要使用的匹配的编号。 这允许拾取比第一个表达式匹配更多。 Submatch是匹配的子匹配（最多支持50个）。 “no-found”参数指定在找不到正则表达式的情况下要返回哪个字符串。 请注意，匹配和子匹配从零开始。 目前不可能通过一次调用提取多个子匹配。</p>
+<ul>
+<li>field(str, delim, matchnbr)</li>
+</ul>
+<p>返回一个基于字段的子字符串。 str是要搜索的字符串，delim是分隔符，matchnbr是搜索的匹配（第一个匹配从1开始）。 这与基于字段的属性替换选项类似。 7.3.7之前的版本只支持单个字符作为分隔符。 从版本7.3.7开始，可以使用完整的字符串作为分隔符。 如果使用单个字符作为分隔符，则delim是字段分隔符的数字ascii值（以便可以指定不可打印的字符）。 如果使用字符串作为分隔符，则要指定多字符字符串（例如“＃011”）。</p>
+<p>请注意，当单个字符被指定为字符串字段（$ msg，“，”，3）时，将执行基于字符串的提取，这比等效的单字符字段（$ msg，44,3）提取性能更强。 例如。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">set</span> $!usr!<span class="keyword">field</span> = <span class="keyword">field</span>($msg, <span class="number">32</span>, <span class="number">3</span>);  <span class="comment">-- 第三个字段，由空格分开</span></span><br><span class="line"><span class="keyword">set</span> $!usr!<span class="keyword">field</span> = <span class="keyword">field</span>($msg, <span class="string">"#011"</span>, <span class="number">2</span>); <span class="comment">-- 第二个字段，有 "#011"分开</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>exec_template</li>
+</ul>
+<p>通过执行模板设置变量。 基本上，这可以很容易地提取属性的一些部分，并在以后使用它作为任何其他变量。</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">template(<span class="attribute">name</span>=<span class="string">"extract"</span> <span class="attribute">type</span>=<span class="string">"string"</span> <span class="attribute">string</span>=<span class="string">"%msg:F:5%"</span>)</span><br><span class="line"><span class="builtin-name">set</span> $!xyz = exec_template(<span class="string">"extract"</span>);</span><br></pre></td></tr></table></figure>
+<p>变量xyz 可以用于过滤中 :</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> $!xyz contains <span class="string">'abc'</span> <span class="keyword">then</span> &#123;action()&#125;</span><br></pre></td></tr></table></figure>
+<p>或者创建动态的文件路径 :</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">template(<span class="attribute">name</span>=<span class="string">"DynaFile"</span> <span class="attribute">type</span>=<span class="string">"string"</span> <span class="attribute">string</span>=<span class="string">"/var/log/%$!xyz%-data/%timereported%-%$!xyz%.log"</span>)</span><br></pre></td></tr></table></figure>
+<p>更多信息请参考: <a href="http://www.rsyslog.com/how-to-use-set-variable-and-exec_template" target="_blank" rel="noopener">http://www.rsyslog.com/how-to-use-set-variable-and-exec_template</a></p>
+<ul>
+<li>prifilt(constant)</li>
+</ul>
+<p>模仿传统的基于PRI的过滤器（如“<em>.</em>”或“mail.info”）。 传统的过滤器字符串必须以常量字符串形式给出。 动态字符串评估是不允许的（出于性能原因）。</p>
+<ul>
+<li>dyn_inc(bucket_name_literal_string, str)</li>
+</ul>
+<p>递增在由bucket_name_literal_string标识的dyn-stats存储区中由str标识的计数器。 增量成功时返回0，任何其他返回值都表示增量失败。<br>这里更新的计数器是由impstats报告的。<br>除特殊情况（如内存分配失败等）外，由于度量标准基数被低估，递增可能失败。 Bucket被配置为支持最大基数（以防止滥用），并且在满时遇到新的（以前未见过的）度量名称（str）时拒绝增量操作。</p>
+<p>在这里了解更多关于它的动态统计:<a href="http://www.rsyslog.com/doc/v8-stable/configuration/dyn_stats.html" target="_blank" rel="noopener">http://www.rsyslog.com/doc/v8-stable/configuration/dyn_stats.html</a></p>
+<ul>
+<li>lookup(table_name_literal_string, key)</li>
+</ul>
+<p>查找表是一个强大的构造，可以根据消息内容获取类信息。 它在一个数据文件的顶部工作，该数据文件将键（要查找）映射到值（查找的结果）。<br>这个想法是使用消息属性（或它的衍生物）作为索引到表中，然后返回另一个值。 例如，$ fromhost-ip可以用作索引，表值代表服务器的类型或者它所在的部门或远程办公室。</p>
+<p>在这里阅读更多关于它查找表:<a href="http://www.rsyslog.com/doc/v8-stable/configuration/lookup_tables.html" target="_blank" rel="noopener">http://www.rsyslog.com/doc/v8-stable/configuration/lookup_tables.html</a></p>
+<ul>
+<li>num2ipv4</li>
+</ul>
+<p>将整数转换为IPv4地址并以字符串形式返回地址。 输入是一个值在0到4294967295之间的整数。输出格式是’&gt;十进制&lt;.&gt;十进制&lt;.&gt;十进制&lt;.&gt;十进制&lt;’和’-1’，如果整数输入无效或函数遇到 问题。</p>
+<ul>
+<li>ipv42num</li>
+</ul>
+<p>将IPv4地址转换为整数并返回整数。 输入是一个字符串; 期望的地址格式可能包括开始和结束的空格，但是不能包含任何其他的字符（除了点）。 如果格式确实包含这些，则该函数将导致错误并返回-1。</p>
+<ul>
+<li>ltrim</li>
+</ul>
+<p>删除给定字符串开始处的任何空格。 输入是一个字符串，输出是从第一个非空格字符开始的相同字符串。</p>
+<ul>
+<li>rtrim</li>
+</ul>
+<p>删除给定字符串末尾的空格。 输入是一个字符串，输出是以最后一个非空格字符结尾的相同字符串。</p>
+<p>format_time(unix_timestamp, format_str）</p>
+<p>注意：这是实验性的代码 - 它可能会在8.30.0以后的版本中被删除或更改。 请密切关注ChangeLog的更新。</p>
+<p>将UNIX时间戳转换为格式化的RFC 3164或RFC 3339日期/时间字符串。 第一个参数应该是一个整数值，表示1970-01-01T00：00：0Z（UNIX时代）以来的秒数。 第二个参数可以是“date-rfc3164”或“date-rfc3339”之一。 输出是一个包含格式化日期/时间的字符串。 日期/时间字符串以UTC表示（不提供时区转换）。</p>
+<p>注意：如果函数的输入不是合适的UNIX时间戳，则将返回包含参数原始值的字符串，而不是格式化的日期/时间字符串。</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="title">format_time</span><span class="params">(<span class="number">1507165811</span>, <span class="string">"date-rfc3164"</span>)</span></span></span><br></pre></td></tr></table></figure>
+<p>结果</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">Oct</span>  5 01<span class="selector-pseudo">:10</span><span class="selector-pseudo">:11</span></span><br></pre></td></tr></table></figure>
+<p>另一个</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="title">format_time</span><span class="params">(<span class="number">1507165811</span>, <span class="string">"date-rfc3339"</span>)</span></span></span><br></pre></td></tr></table></figure>
+<p>结果</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">2017<span class="selector-tag">-10-05T01</span><span class="selector-pseudo">:10</span><span class="selector-pseudo">:11Z</span></span><br></pre></td></tr></table></figure>
+<p>在UNIX时间戳无效的情况下:</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="title">format_time</span><span class="params">(<span class="string">"foo"</span>, <span class="string">"date-rfc3339"</span>)</span></span></span><br></pre></td></tr></table></figure>
+<p>产生原始值:</p>
+<figure class="highlight ebnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">foo</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>parse_time(timestamp)</li>
+</ul>
+<p>将RFC 3164或RFC 3339格式的日期/时间字符串转换为UNIX时间戳（表示自UNIX时代以来秒数的整数值：1970-01-01T00：00：0Z）。</p>
+<p>如果函数的输入不是格式正确的RFC 3164或RFC 3339日期/时间字符串，或者无法解析，则返回0。</p>
+<p>注意：此功能不支持包含年份或时区信息的特殊RFC 3164日期/时间。<br>注意：RFC 3339日期/时间字符串中的小数秒（如果存在）将被丢弃。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">parse_time(<span class="string">"Oct  5 01:10:11"</span>) # Assumes the current year (<span class="number">2017</span>, <span class="keyword">in</span> <span class="keyword">this</span> example)</span><br></pre></td></tr></table></figure>
+<p>结果</p>
+<figure class="highlight dns"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1507165811</span></span><br></pre></td></tr></table></figure>
+<p>另一种</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="title">parse_time</span><span class="params">(<span class="string">"2017-10-05T01:10:11+04:00"</span>)</span></span></span><br></pre></td></tr></table></figure>
+<p>结果</p>
+<figure class="highlight dns"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1507151411</span></span><br></pre></td></tr></table></figure>
+<h4 id="Control-Structures-（控制结构）"><a href="#Control-Structures-（控制结构）" class="headerlink" title="Control Structures （控制结构）"></a>Control Structures （控制结构）</h4><p>RainerScript中的控制结构与C，Java，Javascript，Ruby，Bash等许多其他主流语言的语义类似。因此本节假定读者熟悉这样的结构的语义，并且在使用中描述RainerScript实现 例子形式而不是形式定义和详细的语义文档。</p>
+<p>RainerScript支持以下控制结构：</p>
+<ul>
+<li>if</li>
+</ul>
+<figure class="highlight gams"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (<span class="symbol">$</span>msg contains <span class="string">"important"</span>) <span class="keyword">then</span> &#123;</span><br><span class="line">   <span class="keyword">if</span> ( <span class="symbol">$</span>.foo != <span class="string">""</span> ) <span class="keyword">then</span> <span class="keyword">set</span> $.foo <span class="comment">= $.bar &amp; $.baz</span>;</span><br><span class="line">   action(type=<span class="string">"omfile"</span> <span class="keyword">file</span>=<span class="string">"/var/log/important.log"</span> template=<span class="string">"outfmt"</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>if/else-if/else</li>
+</ul>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (<span class="variable">$msg</span> contains <span class="string">"important"</span>) then &#123;</span><br><span class="line">   <span class="builtin-name">set</span> $.foo = $.bar &amp; $.baz;</span><br><span class="line">   action(<span class="attribute">type</span>=<span class="string">"omfile"</span> <span class="attribute">file</span>=<span class="string">"/var/log/important.log"</span> <span class="attribute">template</span>=<span class="string">"outfmt"</span>)</span><br><span class="line">&#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="variable">$msg</span> startswith <span class="string">"slow-query:"</span>) then &#123;</span><br><span class="line">   action(<span class="attribute">type</span>=<span class="string">"omfile"</span> <span class="attribute">file</span>=<span class="string">"/var/log/slow_log.log"</span> <span class="attribute">template</span>=<span class="string">"outfmt"</span>)</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">   <span class="builtin-name">set</span> $.foo = $.quux;</span><br><span class="line">   action(<span class="attribute">type</span>=<span class="string">"omfile"</span> <span class="attribute">file</span>=<span class="string">"/var/log/general.log"</span> <span class="attribute">template</span>=<span class="string">"outfmt"</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>foreach<br>Foreach可以迭代数组和对象。 与数组迭代（有序）相反，对象迭代以任意顺序（无序）访问键值。</li>
+</ul>
+<p>对于下面的foreach调用：</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">foreach (<span class="variable">$.</span>i <span class="keyword">in</span> <span class="variable">$.</span>collection) <span class="keyword">do</span> &#123;</span><br><span class="line">   ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>意识是 $.collection 是个数组 [1, “2”, {“a”: “b”}, 4], 指 $.i 将循环调用 1, “2”, {“a” : “b”} 和4.</p>
+<p>当$ .collection包含一个对象{“a”：“b”，“c”：[1，2，3]，“d”：{“foo”：“bar”}} 结果将是$.i循环调用{“key”：“a”，“value”：“b”}，{“key”：“c”，“value”：[1，2，3]}和{“key”：“d” ，“value”：{“foo”：“bar”}}（不一定按顺序）。 在这种情况下，键和值将分别作为$.i!key和$.i!value进行访问。</p>
+<p>这里是一个嵌套的foreach语句的例子：</p>
+<figure class="highlight mel"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">foreach ($.quux <span class="keyword">in</span> $!foo) <span class="keyword">do</span> &#123;</span><br><span class="line">   action(type=<span class="string">"omfile"</span> <span class="keyword">file</span>=<span class="string">"./rsyslog.out.log"</span> template=<span class="string">"quux"</span>)</span><br><span class="line">   foreach ($.corge <span class="keyword">in</span> $.quux!bar) <span class="keyword">do</span> &#123;</span><br><span class="line">      reset $.grault = $.corge;</span><br><span class="line">      action(type=<span class="string">"omfile"</span> <span class="keyword">file</span>=<span class="string">"./rsyslog.out.log"</span> template=<span class="string">"grault"</span>)</span><br><span class="line">      <span class="keyword">if</span> ($.garply != <span class="string">""</span>) then</span><br><span class="line">          set $.garply = $.garply &amp; <span class="string">", "</span>;</span><br><span class="line">      reset $.garply = $.garply &amp; $.grault!baz;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>请注意，在foreach-statement主体中的异步操作调用几乎总是将action.copyMsg设置为on。 这是因为在foreach中的动作调用通常要使用变量循环填充（在上面的例子中，$ .quux和$ .corge），这会导致消息变异，而异步动作必须看到消息，因为它是在 循环体，所以他们必须做一个副本，以保持安全的进一步修改随着迭代继续。 例如，使用基于链接列表的队列的异步操作调用将如下所示：</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">foreach</span> ($.quux <span class="keyword">in</span> $!foo) <span class="keyword">do</span> &#123;</span><br><span class="line">   action(<span class="attribute">type</span>=<span class="string">"omfile"</span> <span class="attribute">file</span>=<span class="string">"./rsyslog.out.log"</span> <span class="attribute">template</span>=<span class="string">"quux"</span> queue.<span class="attribute">type</span>=<span class="string">"linkedlist"</span> action.<span class="attribute">copyMsg</span>=<span class="string">"on"</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>call</li>
+</ul>
+<p>细节请参考：<a href="http://www.rsyslog.com/doc/v8-stable/rainerscript/rainerscript_call.html" target="_blank" rel="noopener">http://www.rsyslog.com/doc/v8-stable/rainerscript/rainerscript_call.html</a></p>
+<ul>
+<li>continue</li>
+</ul>
+<p>一个NOP，很有用 例如 if语句中的一部分</p>
+<h4 id="configuration-objects"><a href="#configuration-objects" class="headerlink" title="configuration objects"></a>configuration objects</h4><ul>
+<li>action()</li>
+</ul>
+<p>动作对象是描述要执行的动作的主要手段。</p>
+<ul>
+<li>global()</li>
+</ul>
+<p>这用于设置全局配置参数。 有关详细信息，请参阅rsyslog全局配置对象</p>
+<ul>
+<li>input()</li>
+</ul>
+<p>输入对象是描述输入的主要手段，用于收集rsyslog处理的消息。</p>
+<ul>
+<li>module()</li>
+</ul>
+<p>模块对象用于加载插件。</p>
+<ul>
+<li>parser()</li>
+</ul>
+<p>解析器对象用于定义自定义解析器对象。</p>
+<ul>
+<li>timezone()</li>
+</ul>
+<p>时区对象用于定义时区设置。</p>
+<h4 id="Constant-Strings"><a href="#Constant-Strings" class="headerlink" title="Constant Strings"></a>Constant Strings</h4><p>字符串常量在很多地方都是必需的：比较，配置参数值和函数参数，这里列出几个重要的参数。</p>
+<p>在常量字符串中，特殊字符是通过在它们前面加上反斜杠来进行转义的 - 就像在C编程语言或PHP中一样。</p>
+<p>如果不确定如何正确转义，请使用RainerScript字符串转义在线工具。</p>
+<h4 id="Variable-Property-types-变量（属性）类型"><a href="#Variable-Property-types-变量（属性）类型" class="headerlink" title="Variable (Property) types    变量（属性）类型"></a>Variable (Property) types    变量（属性）类型</h4><p>所有的rsyslog属性（参见列表的属性页面）都可以在RainerScript中使用，前缀为“$”，例如：</p>
+<figure class="highlight gams"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">set</span> $.x！host <span class="comment">= $ hostname</span>;</span><br></pre></td></tr></table></figure>
+<p>另外，它也支持局部变量。局部变量是当前消息的本地变量，但不是消息属性（例如，“$！”，所有的JSON属性都不包含它们）。</p>
+<p>只有消息JSON（CEE /Lumberjack）属性可以通过set，unset和reset语句来修改，而不是任何其他的消息属性。显然，局部变量也是可以修改的。</p>
+<p>消息JSON属性名称以“$！”开头，其中bang字符表示根。</p>
+<p>局部变量名称以“$.”开头，其中点表示根。</p>
+<p>JSON属性和局部变量都可以在最后一个元素之前包含任意的深度路径。爆炸字符总是用作路径分隔符，不管它是一个消息属性还是一个局部变量。例如，“$！path1！path2！varname”是一个三层深度的消息属性，其中非常相似的“$ .path1！path2！varname”指定了一个三层深的局部变量。 rsyslog使用紧跟在美元符号后面的重音符或点符号来分隔不同的类型。</p>
+<p>请注意，后缀分号需要指示表达式的结尾。如果没有给出，配置加载将失败并出现语法错误消息。</p>
+<p>检查以下用法示例以了解这些语句的行为：</p>
+<ul>
+<li>set </li>
+</ul>
+<p>设置局部变量或json属性的值，但是如果被寻址的变量已经包含一个值，它的行为就会有所不同，如下所示：</p>
+<p>如果现有值和新值都是对象，则合并值，但将新值合并到根，而不是与给定键的值合并。 例如。</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">set</span> $.x!one = <span class="string">"val_1"</span>;</span><br><span class="line"># results <span class="keyword">in</span> $. = &#123; <span class="string">"x"</span>: &#123; <span class="string">"one"</span>: <span class="string">"val_1"</span> &#125; &#125;</span><br><span class="line"><span class="keyword">set</span> $.y!two = <span class="string">"val_2"</span>;</span><br><span class="line"># results <span class="keyword">in</span> $. = &#123; <span class="string">"x"</span>: &#123; <span class="string">"one"</span>: <span class="string">"val_1"</span> &#125;, <span class="string">"y"</span>: &#123; <span class="string">"two"</span>: <span class="string">"val_2"</span> &#125; &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">set</span> $.z!<span class="keyword">var</span> = $.x;</span><br><span class="line"># results <span class="keyword">in</span> $. = &#123; <span class="string">"x"</span>: &#123; <span class="string">"one"</span>: <span class="string">"val_1"</span> &#125;, <span class="string">"y"</span>: &#123; <span class="string">"two"</span>: <span class="string">"val_2"</span> &#125;, <span class="string">"z"</span>: &#123; <span class="string">"var"</span>: &#123; <span class="string">"one"</span>: <span class="string">"val_1"</span> &#125; &#125; &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">set</span> $.z!<span class="keyword">var</span> = $.y;</span><br><span class="line"># results <span class="keyword">in</span> $. = &#123; <span class="string">"x"</span>: &#123; <span class="string">"one"</span>: <span class="string">"val_1"</span> &#125;, <span class="string">"y"</span>: &#123; <span class="string">"two"</span>: <span class="string">"val_2"</span> &#125;, <span class="string">"z"</span>: &#123; <span class="string">"var"</span>: &#123; <span class="string">"one"</span>: <span class="string">"val_1"</span> &#125; &#125;, <span class="string">"two"</span>: <span class="string">"val_2"</span> &#125;</span><br><span class="line"># note that the key *two* is at root level and not  under *$.z!<span class="keyword">var</span>*.</span><br></pre></td></tr></table></figure>
+<p>忽略新值如果旧值是一个对象，但新值不是一个对象（如字符串，数字等）。 例如：</p>
+<figure class="highlight gams"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">set</span> $.x!one <span class="comment">=</span> <span class="comment">"val_1"</span>;</span><br><span class="line"><span class="keyword">set</span> $.x <span class="comment">=</span> <span class="comment">"quux"</span>;</span><br><span class="line"># results in <span class="symbol">$</span>. = &#123; <span class="string">"x"</span>: &#123; <span class="string">"one"</span>: <span class="string">"val_1"</span> &#125; &#125;</span><br><span class="line"># note that <span class="string">"quux"</span> was ignored</span><br></pre></td></tr></table></figure>
+<p>重置变量，如果旧值不是一个对象</p>
+<figure class="highlight gams"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">set</span> $.x!val <span class="comment">=</span> <span class="comment">"val_1"</span>;</span><br><span class="line"><span class="keyword">set</span> $.x!val <span class="comment">=</span> <span class="comment">"quux"</span>;</span><br><span class="line"># results in <span class="symbol">$</span>. = &#123; <span class="string">"x"</span>: &#123; <span class="string">"val"</span>: <span class="string">"quux"</span> &#125; &#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>unset</li>
+</ul>
+<p>删除变量值. Eg:</p>
+<figure class="highlight gams"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">set</span> $.x!val <span class="comment">=</span> <span class="comment">"val_1"</span>;</span><br><span class="line">unset <span class="symbol">$</span>.x!val;</span><br><span class="line"># results in <span class="symbol">$</span>. = &#123; <span class="string">"x"</span>: &#123; &#125; &#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>reset</li>
+</ul>
+<p>强制设置新的值，而不管最初包含的变量或甚至设置的变量。 例如。</p>
+<figure class="highlight stata"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"># to contrast with the <span class="keyword">set</span> example above, here is how results would look with reset</span><br><span class="line"><span class="keyword">set</span> $.x!<span class="keyword">one</span> = <span class="string">"val_1"</span>;</span><br><span class="line"><span class="keyword">set</span> $.y!<span class="keyword">two</span> = <span class="string">"val_2"</span>;</span><br><span class="line"><span class="keyword">set</span> $.z!<span class="keyword">var</span> = $.x;</span><br><span class="line"># results <span class="keyword">in</span> $. = &#123; <span class="string">"x"</span>: &#123; <span class="string">"one"</span>: <span class="string">"val_1"</span> &#125;, <span class="string">"y"</span>: &#123; <span class="string">"two"</span>: <span class="string">"val_2"</span> &#125;, <span class="string">"z"</span>: &#123; <span class="string">"var"</span>: &#123; <span class="string">"one"</span>: <span class="string">"val_1"</span> &#125; &#125; &#125;</span><br><span class="line"># '<span class="keyword">set</span>' or 'reset' can be used interchangeably above(3 lines), they both have the same behaviour, <span class="keyword">as</span> variable doesn't have <span class="keyword">an</span> existing value</span><br><span class="line"></span><br><span class="line">reset $.z!<span class="keyword">var</span> = $.y;</span><br><span class="line"># results <span class="keyword">in</span> $. = &#123; <span class="string">"x"</span>: &#123; <span class="string">"one"</span>: <span class="string">"val_1"</span> &#125;, <span class="string">"y"</span>: &#123; <span class="string">"two"</span>: <span class="string">"val_2"</span> &#125;, <span class="string">"z"</span>: &#123; <span class="string">"var"</span>: &#123; <span class="string">"two"</span>: <span class="string">"val_2"</span> &#125; &#125; &#125;</span><br><span class="line"># <span class="keyword">note</span> how the value of $.z!<span class="keyword">var</span> was replaced</span><br><span class="line"></span><br><span class="line">reset $.x = <span class="string">"quux"</span>;</span><br><span class="line"># results <span class="keyword">in</span> $. = &#123; <span class="string">"x"</span>: <span class="string">"quux"</span>, <span class="string">"y"</span>: &#123; <span class="string">"two"</span>: <span class="string">"val_2"</span> &#125;, <span class="string">"z"</span>: &#123; <span class="string">"var"</span>: &#123; <span class="string">"two"</span>: <span class="string">"val_2"</span> &#125; &#125; &#125;</span><br></pre></td></tr></table></figure>
+<h4 id="Lookup-Tables"><a href="#Lookup-Tables" class="headerlink" title="Lookup Tables"></a>Lookup Tables</h4><p>查找表（<a href="http://www.rsyslog.com/doc/v8-stable/configuration/lookup_tables.html）" target="_blank" rel="noopener">http://www.rsyslog.com/doc/v8-stable/configuration/lookup_tables.html）</a> 是一种功能强大的结构，用于根据消息内容获取“class”信息（例如，为不同的服务器类型，部门或远程办公室构建日志文件名称）。</p>
+<h4 id="General-Queue-Parameters"><a href="#General-Queue-Parameters" class="headerlink" title="General Queue Parameters"></a>General Queue Parameters</h4><p>队列参数可以和下面的语句一起使用：</p>
+<ol>
+<li>action()</li>
+<li>ruleset()</li>
+<li>main_queue()</li>
+</ol>
+<p>队列需要在应该影响的动作或规则集中进行配置。如果没有配置，将使用默认值。因此，默认的规则集只有默认的主队列。 “特定操作”队列默认不设置。要充分了解队列参数及其交互方式，请务必阅读队列文档。<a href="http://www.rsyslog.com/doc/v8-stable/concepts/queues.html" target="_blank" rel="noopener">http://www.rsyslog.com/doc/v8-stable/concepts/queues.html</a></p>
+<ul>
+<li>queue.filename name</li>
+</ul>
+<p>要用于队列文件的文件名。请注意，这实际上只是文件名。不能在此参数中指定一个目录。如果文件应在特定的目录中创建，请为此指定queue.spoolDirectory。<br>文件名用于构建队列文件以完成路径。</p>
+<ul>
+<li>queue.spoolDirectory  name</li>
+</ul>
+<p>名称这是存储队列文件的目录。请注意，该目录必须存在，它不是由rsyslog自动创建的。如果没有指定spoolDirectory，则使用工作目录</p>
+<ul>
+<li>queue.size number</li>
+</ul>
+<p>这是消息数量中队列的最大大小。请注意，将队列大小设置为非常小的值（大约低于100个消息）不受支持，并可能导致不可预知的结果。有关此限制的当前状态的更多信息，请参阅rsyslog FAQ：“队列大小的下限”。默认取决于队列类型和rsyslog版本，如果你需要一个特定的值，请指定它。否则，rsyslog会选择它考虑的版本。例如，在rsyslog rsyslog 8.30.0中，规则集队列的缺省大小为50000，配置为非直接的动作队列的大小为1000。</p>
+<ul>
+<li>queue.dequeuebatchsize number   </li>
+</ul>
+<p>默认128</p>
+<ul>
+<li>queue.maxdiskspace number</li>
+</ul>
+<p>所有队列文件一起在磁盘上使用的最大大小。 请注意，实际大小可能会稍大于配置的最大值，因为rsyslog从不写入部分队列记录。</p>
+<ul>
+<li>queue.highwatermark number</li>
+</ul>
+<p>这仅适用于磁盘辅助队列。 当队列填满这个数量的消息时，队列开始将消息假脱机到磁盘。 请注意，这不应该作为正常处理的一部分发生，因为磁盘队列模式比内存中队列模式慢得多。 对于输出操作目标在一段时间内脱机的情况，应该保留磁盘。 默认90％的队列大小</p>
+<ul>
+<li>queue.lowwatermark number  </li>
+</ul>
+<p>默认70％的队列大小</p>
+<ul>
+<li>queue.fulldelaymark number</li>
+</ul>
+<p>队列应阻塞可延迟消息的消息数。 消息不再处理，直到队列再次有足够的空间。 如果消息是可延迟的取决于输入。 例如，通过imtcp收到的消息是可延迟的（因为TCP可以推回），但是通过imudp收到的消息不是（因为UDP不允许推回）。 这个设置背后的意图是在非延迟消息的几乎完整队列中留出一些空间，如果队列空间不足将会丢失。 请注意，如果您使用DA队列，则在高水位标记之后设置完全延迟标记将使队列永远不会为可延迟输入激活磁盘模式。 所以这可能不是你想要的。 队列大小的默认值为97％</p>
+<ul>
+<li>queue.lightdelaymark  number</li>
+</ul>
+<p>默认70％的队列大小</p>
+<ul>
+<li>queue.discardmark  number</li>
+</ul>
+<p>默认80％的队列大小</p>
+<ul>
+<li>queue.discardseverity</li>
+</ul>
+<p>number <em>numerical</em> severity! default 8 (nothing discarded)</p>
+<ul>
+<li>queue.checkpointinterval number</li>
+</ul>
+<p>每次队列写入磁盘时，默认情况下磁盘队列都不会更新管家结构。 这是出于性能原因。 在发生故障的情况下，数据将会丢失（除非数据通过文件结构被破坏）。 但是，可以将磁盘队列设置为在检查点上记录簿记信息（每n个记录），以使得这也可以是超可靠的。 如果检查点间隔设置为1，则不会丢失数据，但队列速度异常缓慢。</p>
+<ul>
+<li>queue.syncqueuefiles on/off (default “off”)</li>
+</ul>
+<p>在每次写入操作之后，通过发出(f)sync，可以使基于磁盘的队列非常可靠。 将参数设置为“on”时会发生这种情况。 激活这个选项有一个性能损失，所以不应该没有很好的理由打开。 请注意，惩罚也取决于queue.checkpointInterval频率。</p>
+<ul>
+<li>queue.samplinginterval</li>
+</ul>
+<p>此选项允许队列由特定间隔产生的事件填充。 它提供了一种对每个N个事件进行数据采样的方法，而不是全部处理，以减少资源使用（磁盘，带宽…）。此功能适用于8.23及更高版本。</p>
+<ul>
+<li>queue.type</li>
+</ul>
+<p>[FixedArray/LinkedList/Direct/Disk]</p>
+<ul>
+<li>queue.workerthreads number</li>
+</ul>
+<p>工作线程数，默认为1，建议1</p>
+<ul>
+<li>queue.timeoutshutdown number</li>
+</ul>
+<p>超时时间，单位ms（1000ms为1秒！），默认为0（不限制）</p>
+<ul>
+<li>queue.timeoutactioncompletion number</li>
+</ul>
+<p>超时时间，单位ms（1000ms为1秒！），默认为1000，0表示不限制</p>
+<ul>
+<li>queue.timeoutenqueue number</li>
+</ul>
+<p>超时时间，单位ms（1000ms为1秒！），默认为2000，0表示不限制<br>队列满时使用此超时值。 如果rsyslog在超时时间内不能排队消息，则消息被丢弃。 请注意，这是最后的设置（假设默认值用于队列设置或设置了适当的参数）：所有可延迟的输入（如imtcp或imfile）在此阶段已被推回。 此外，丢弃较低优先级的消息（如果已配置）已经发生。 所以如果我们没有足够快的超时，我们会遇到这样的情况之一：</p>
+<ol>
+<li>如果使用imuxsock并且不涉及systemd日志，则系统将变得无响应，并且很可能需要硬复位。</li>
+<li>如果使用带有imjournal转发的imuxsock是活动的，则由于日志丢弃它们而丢失消息（比rsyslog更具侵略性）</li>
+<li>如果使用imjournal，日志将缓冲消息。 如果日志耗尽配置的空间，则消息将被丢弃。 所以在这种模式下丢弃被移到稍后的地方。</li>
+<li>其他不可延迟的来源，如imudp也将失去信息所以提供这个设置是为了防止有问题的情况，这总是会导致消息丢失或系统挂起。对于行动队列，人们可能会争论是否更好地快速溢出到主队列。 如果需要的话，通过设置一个非常大的超时值，这很容易实现。 当然，主队列也是如此，但是如果你这样做的话，你已经被警告过了！</li>
+</ol>
+<p> 换句话说，您可以使用默认值来考虑这种情况。 所有进度被阻止（无法传递讯息）：</p>
+<ol>
+<li><p>所有可延迟的输入（tcp，relp，imfile，imjournal等）将会无限制地阻塞（假设queue.lightdelaymark和queue.fulldelaymark被设置为合理的，这是默认的）。</p>
+</li>
+<li><p>imudp将失去消息，因为操作系统将放弃他们</p>
+</li>
+<li><p>通过UDP或imuxsock到达rsyslog的消息，并且严重程度足以使其不被discardseverity过滤，将阻塞2秒，试图将消息放入队列中（希望发生某些事情可以使空间 在队列中），然后放下，以避免永久阻塞机器。</p>
+</li>
+</ol>
+<p>然后下一条待处理的消息也会被尝试2秒等等</p>
+<ol>
+<li>如果进入动作队列，日志消息将在这2秒钟内保持在主队列中，而到达的其他日志则会在主队列中累积。</li>
+</ol>
+<ul>
+<li>queue.timeoutworkerthreadshutdown  number</li>
+</ul>
+<p>超时时间，单位ms（1000ms为1秒！），默认为60000（1分钟）</p>
+<ul>
+<li>queue.workerthreadminimummessages </li>
+</ul>
+<p>number default queue size/number of workers</p>
+<ul>
+<li>queue.maxfilesize</li>
+</ul>
+<p>size_nbr default 1m</p>
+<ul>
+<li>queue.saveonshutdown  on/<strong>off</strong></li>
+<li>queue.dequeuetimebegin </li>
+</ul>
+<p>单位微秒（1000000us是1秒！），默认为0（无延迟）。 简单的限速！</p>
+<ul>
+<li>queue.dequeuetimeend  number</li>
+<li>queue.samplinginterval number</li>
+</ul>
+<p>动作队列的采样间隔。 此参数指定在排入队列之前将丢弃多少行日志。 默认为0。</p>
+<p>例子：</p>
+<p>以下是带有自己的队列的TCP转发操作示例。</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">action(<span class="attribute">type</span>=<span class="string">"omfwd"</span> <span class="attribute">target</span>=<span class="string">"192.168.2.11"</span> <span class="attribute">port</span>=<span class="string">"10514"</span> <span class="attribute">protocol</span>=<span class="string">"tcp"</span></span><br><span class="line">       queue.<span class="attribute">filename</span>=<span class="string">"forwarding"</span> queue.<span class="attribute">size</span>=<span class="string">"1000000"</span> queue.<span class="attribute">type</span>=<span class="string">"LinkedList"</span></span><br><span class="line">      )</span><br></pre></td></tr></table></figure>
+<h4 id="The-rsyslog-“call”-statement"><a href="#The-rsyslog-“call”-statement" class="headerlink" title="The rsyslog “call”  statement"></a>The rsyslog “call”  statement</h4><p>rsyslog“call”语句用于将规则集绑定在一起。它是按照通常的编程语言“调用”语句建模的。把一个规则集想象成一个子程序（它到底是什么！），你就可以得到这个图像。</p>
+<p>“call”语句可用于调用任何类型的规则集。如果规则集分配了队列，则消息将被发送到该队列并异步处理。否则，在规则集执行完成后，规则集将被同步执行，控制权在调用后立即返回。</p>
+<p>请注意，对于“停止”语句，异步执行和同步执行之间存在重要区别。在异步运行时不会影响原始消息的处理。</p>
+<p>“call”语句取代了不推荐的omruleset模块。它提供omruleset具有的所有功能，但以更高效的方式工作。请注意，omruleset是在v7之前的引擎的限制内调用规则集的一种破解。 “呼叫”是新引擎的干净解决方案。特别是对于没有关联队列（同步操作）的规则集，它没有开销（真的！）。 omruleset总是需要重复消息，通常意味着至少〜250字节的内存写入，一些分配和释放 - 以及更多的性能密集型操作。</p>
+<h5 id="语法："><a href="#语法：" class="headerlink" title="语法："></a>语法：</h5><figure class="highlight autoit"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">call</span> rulesetname</span><br></pre></td></tr></table></figure>
+<p>其中“rulesetname”是在配置中其他位置定义的规则集的名称。 如果调用是同步的还是异步取决于规则集参数。 这不能被“调用”语句覆盖。</p>
+<h5 id="相关链接"><a href="#相关链接" class="headerlink" title="相关链接"></a>相关链接</h5><p>Blog posting announcing “call” statement (with sample)</p>
+<p><a href="http://blog.gerhards.net/2012/10/how-to-use-rsyslogs-ruleset-and-call.html" target="_blank" rel="noopener">http://blog.gerhards.net/2012/10/how-to-use-rsyslogs-ruleset-and-call.html</a></p>
+<h4 id="The-rsyslog-“call-indirect”-statement"><a href="#The-rsyslog-“call-indirect”-statement" class="headerlink" title="The rsyslog “call_indirect” statement"></a>The rsyslog “call_indirect” statement</h4><p>rsyslog“call_indirect”语句等价于“call”语句，不同的是被调用的规则集的名称不是常量，而是表达式，因此可以在运行时计算。</p>
+<p>如果使用call_indirect时无法找到规则集名称，则会发出错误消息，并忽略call_indirect语句。 执行继续下一个语句。</p>
+<h5 id="语法：-1"><a href="#语法：-1" class="headerlink" title="语法："></a>语法：</h5><figure class="highlight abnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">call_indirect expression<span class="comment">;</span></span><br></pre></td></tr></table></figure>
+<p>“expression”是任何有效的表达是。 请参阅表达式了解更多信息 请注意，后缀分号需要指示表达式的结尾。 如果没有给出，配置加载将失败并出现语法错误消息</p>
+<h5 id="examples"><a href="#examples" class="headerlink" title="examples"></a>examples</h5><p>“call_indirect”潜在最有用的用例是基于消息变量调用规则集。 让我们假设您已经根据预期的系统日志标记命名了您的规则集。 那么你可以使用</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">call_indirect <span class="variable">$ </span>syslogtag;</span><br></pre></td></tr></table></figure>
+<p>调用这些规则集。 但是，请注意，这可能会被恶意攻击者滥用，攻击者将注入无效的系统日志标记。 这尤其可以用来将消息流重定向到已知的标准规则集。 为了减轻这一点，规则集名称可以通过创建一个唯一的前缀（不要使用这个示例中的一个）稍微改变。 让我们假定使用前缀“changeme-”，那么所有的规则集应该以该字符串开始。 然后，可以使用以下呼叫：</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">call_indirect“changeme-”＆<span class="variable">$ </span>syslogtag;</span><br></pre></td></tr></table></figure>
+<p>虽然可以通过常量名称调用规则集：</p>
+<figure class="highlight abnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">call_indirect“my_ruleset”<span class="comment">;</span></span><br></pre></td></tr></table></figure>
+<p>建议使用“call”语句，因为在这种情况下它提供了优越的性能。</p>
+<h5 id="附件信息"><a href="#附件信息" class="headerlink" title="附件信息"></a>附件信息</h5><p>我们需要有两个不同的语句，“call”和“call_indirect”，因为在添加“call_indirect”时已经存在“call”。 我们无法扩展“call”来支持表达式，因为这会破坏现有的配置。 在这种情况下，调用规则集将会失效，而调用“规则集”将不得不被使用。 因此，我们决定为这个用例添加额外的“call_indirect”语句。</p>
+<h4 id="global-configuration-object"><a href="#global-configuration-object" class="headerlink" title="global() configuration object"></a>global() configuration object</h4><p>全局配置对象允许设置全局参数。 请注意，每个参数只能设置一次，以后不能重新设置。 如果一个参数设置多次，行为是不可预知的。<br>以下参数可以设置：</p>
+<ul>
+<li>action.reportSuspension - binary, default “on”, v7.5.8+</li>
+</ul>
+<p>如果启用（“on”）action 将在syslog.*下记录消息，当一个action暂停或恢复时。 通常连接到后端系统出现问题时，会发生这种情况。 如果禁用（“关闭”），则不会生成这些消息。 这些消息可以用于检测后端系统的问题。 最重要的是，频繁的暂停和恢复指向一个问题领域</p>
+<ul>
+<li>action.reportSuspensionContinuation - binary, default “off”, v7.6.1+, v8.2.0+</li>
+</ul>
+<p>如果启用（“开”），该action不仅仅报告第一次暂停，但是每次暂停被延长。 否则，后续消息不会被记录。如果此设置设置为“on”，则action.reportSuspension也会自动打开为“on”。</p>
+<ul>
+<li><p>workDirectory</p>
+</li>
+<li><p>dropMsgsWithMaliciousDNSPtrRecords</p>
+</li>
+<li><p>localHostname</p>
+</li>
+<li><p>preserveFQDN</p>
+</li>
+<li><p>defaultNetstreamDriverCAFile</p>
+</li>
+</ul>
+<p>对于TLS系统日志，可以验证机器密钥和证书的CA证书（请参见下文）</p>
+<ul>
+<li>defaultNetstreamDriverKeyFile</li>
+</ul>
+<p>机器私钥</p>
+<ul>
+<li>defaultNetstreamDriverCertFile</li>
+</ul>
+<p>机器公钥</p>
+<ul>
+<li>debug.gnutls (0-10; default:0)</li>
+</ul>
+<p>除0以外的任何其他参数都会启用GnuTLS的调试消息。 给出的消息数量取决于参数的高度，0没有任何意义，10是非常多的。 警告！ 更高的参数可能会给出比需要更多的信息。 我们建议您首先使用小参数来防止发生。 如果启用通用调试，此参数仅起作用。</p>
+<ul>
+<li>processInternalMessages binary (on/off)</li>
+</ul>
+<p>这告诉rsyslog是否应该处理内部消息本身。 默认的操作模式（“关”）使rsyslog发送消息到系统日志接收器（如果它是唯一的实例，从那里接收它们）。 这也适用于systemd日志，并会使rsyslog消息显示在systemd状态控制信息中。</p>
+<p>如果rsyslog的这个（实例）不是主实例，并且有另一个主要的日志系统，rsyslog内部消息将被插入到主实例的系统日志流中。 在这种情况下，设置为（“on”）将使您能够接收来自其实例的内部消息。</p>
+<p>请注意，早期版本的rsyslog工作方式相反。 有关更改的更多信息可以在rsyslog-error-reporting-improved中找到。</p>
+<ul>
+<li>stdlog.channelspec</li>
+</ul>
+<p>允许设置liblogging-stdlog通道说明符字符串。 这又允许发送rsyslog日志消息到不同于系统默认值的目的地。 请注意，只有在processInternalMessages设置为“off”的情况下，此参数才有效。 否则，它会被默默地忽略。</p>
+<ul>
+<li>defaultNetstreamDriver</li>
+</ul>
+<p>设置”gtls”,开启TLS<br>Set it to “gtls” to enable TLS for TLS syslog</p>
+<ul>
+<li>maxMessageSize</li>
+</ul>
+<p>rsyslog可以处理的最大消息大小。 默认值是8K。 超过最大尺寸的任何内容都将被截断。</p>
+<ul>
+<li>janitor.interval [minutes], available since 8.3.3</li>
+</ul>
+<p>设置管理员进程运行的时间间隔。</p>
+<ul>
+<li>debug.onShutdown available in 7.5.8+</li>
+</ul>
+<p>如果启用（“on”），rsyslog将在请求系统关闭时记录调试消息。 这可以用来跟踪仅在关机期间发生的问题。 在正常操作期间，系统性能不受影响。 请注意，为使此选项有用，还必须设置debug.logFile参数（或相应的环境变量）。</p>
+<ul>
+<li>debug.logFile available in 7.5.8+</li>
+</ul>
+<p>这用于指定调试日志文件名称。 它用于所有调试输出。 请注意，RSYSLOG_DEBUGLOG环境变量总是重写debug.logFile的值。</p>
+<ul>
+<li>net.ipprotocol available in 8.6.0+</li>
+</ul>
+<p>这允许指示rsyslog仅使用IPv4或IPv6。 可能的值是“未指定的”，在这种情况下，使用两种协议，“ipv4-only”和“ipv6-only”，它们限制使用指定的协议。 默认是“未指定”。</p>
+<p>注意：这取代了以前的-4和-6 rsyslogd命令行选项。</p>
+<ul>
+<li>net.aclAddHostnameOnFail available in 8.6.0+</li>
+</ul>
+<p>如果“启用”，在ACL处理期间，出于性能原因，主机名被解析为IP地址。 如果在这个过程中DNS失败，主机名将被添加为通配符文本，一旦DNS重新启动，这将导致适当的，但稍慢的操作。</p>
+<p>默认是“关”。</p>
+<ul>
+<li>net.aclResolveHostname available in 8.6.0+</li>
+</ul>
+<p>如果“关闭”，则在ACL处理期间不要将主机名解析为IP地址。</p>
+<p>默认开启</p>
+<ul>
+<li>net.enableDNS [on/off] available in 8.6.0+</li>
+</ul>
+<p>默认开启</p>
+<p>可以用来打开或关闭DNS名称解析。</p>
+<ul>
+<li>net.permitACLWarning [on/off] available in 8.6.0+</li>
+</ul>
+<p>默认开启</p>
+<p>如果“关闭”，则禁止从未授权的机器（不在AllowedSender列表中）收到消息时发出的警告。</p>
+<ul>
+<li>parser.parseHostnameAndTag [on/off] available in 8.6.0+</li>
+</ul>
+<p>默认值：打开</p>
+<p>这控制解析器试图解析来自消息的HOSTNAME和TAG字段。 默认是“开”，在这种情况下解析发生。 如果设置为“关”，则不解析这些字段。 请注意，这通常不是你想要的。</p>
+<p>强烈建议只有当你确切知道你为什么这样做时，才能将此设置更改为“关闭”。</p>
+<ul>
+<li>parser.permitSlashInHostname [on/off] available in 8.25.0+</li>
+</ul>
+<p>默认：关闭</p>
+<p>这将控制是否允许在“程序名”属性中使用斜杠。 这个属性基于BSD概念，通过BSD syslogd源，在程序名称中不允许斜线。 但是，一些Linux工具（包括最重要的日志）在syslogtag中存储斜杠作为程序名称的一部分。 在这种情况下，程序名会在第一个斜杠处截断。 如果此设置更改为“开”，则允许斜线，并且不会终止程序名解析。</p>
+<ul>
+<li>parser.permitSlashInProgramName [on/off] available in 8.25.0+</li>
+</ul>
+<p>默认：关闭</p>
+<p>这将控制是否允许标签的静态部分中的斜杠。 如果该设置关闭，则标签中的值“app/foo [1234]”将解析程序名为“app”。 如果应用程序存储绝对路径名称，例如“/app/foo [1234]”，则programname属性将变为空（“”）。 如果您需要将斜线实际存储为程序名称的一部分，则应将此设置更改为“打开”以允许此设置。 然后，“/app/foo[1234]”的syslog标签将导致程序名为“/app/foo”。</p>
+<ul>
+<li>senders.keepTrack [on/off] available 8.17.0+</li>
+</ul>
+<p>默认：关闭</p>
+<p>如果打开，rsyslog跟踪已知的发件人，并通过impstats机制报告他们的统计数据。</p>
+<p>保存活动发件人列表。 当检测到新的发件人时，会发出信息性消息。 只有在超时后才能从列表中清除发件人（请参阅senders.timoutAfter参数）。 请注意，当连接关闭时，我们不会有意删除发件人。 发件人跟踪的重点在于能够提供更长时间的数据。 因此，我们不希望仅仅因为发送者已经在短时间内断开（例如，重新启动）而丢弃信息。</p>
+<p>发件人通过主机名进行跟踪（在连接建立时）。</p>
+<p>注意：目前只有imptcp和imtcp支持发件人跟踪。</p>
+<ul>
+<li>enders.timeoutAfter [seconds] available 8.17.0+</li>
+</ul>
+<p>默认：12小时（12 <em> 60 </em> 60秒）</p>
+<p>指定发送者在哪段时间后被认为“已经离开”。 对于每个发件人，rsyslog都会记录最少收到的邮件的时间。 如果在该时间间隔内没有收到消息，则rsyslog会认为发送者不再存在。 然后它将a）发出警告信息（如果已配置）并且b）从主动发送者列表中清除它。 因此，一旦发送数据超时，发件人将不再被报告。</p>
+<ul>
+<li>senders.reportGoneAway [on/off] available 8.17.0+</li>
+</ul>
+<p>默认：关闭</p>
+<p>当发送者在发送者的时间间隔内已经接收到来自发送者的数据时，发出警告消息。</p>
+<ul>
+<li>senders.reportNew [on/off] available 8.17.0+</li>
+</ul>
+<p>默认：关闭</p>
+<p>如果发件人跟踪处于活动状态，请报告尚未在缓存中的发件人。 请注意，这意味着由于长时间不活动而超时的发件人在重新连接后也会被报告。</p>
+<ul>
+<li>debug.unloadModules [on/off] available 8.17.0+</li>
+</ul>
+<p>默认值：打开</p>
+<p>这主要是一个调试设置。 如果设置为“off”，rsyslog永远不会卸载任何模块（包括插件）。 这通常不会导致操作上的问题，但在极端的情况下可能会发生 这个设置的核心好处是它使valgrind堆栈跟踪可读。 在以前的版本中，只有通过特殊的构建选项才能使用相同的功能。</p>
+<ul>
+<li>debug.files [ARRAY of filenames] available 8.29.0+</li>
+</ul>
+<p>默认值：无</p>
+<p>这可以用来配置rsyslog只显示在某些文件中生成的调试输出。 如果该选项已设置，但没有给出文件名，则调试输出的行为就像关闭该选项一样。</p>
+<p>但请注意，由于配置的工作方式，这可能不会影响前几个调试输出，而rsyslog正在读取配置。 为了达到最佳效果，我们建议在配置的最初阶段将此参数设置为最小化不需要的输出。</p>
+<p>有关更多信息，请参阅debug.whitelist。</p>
+<ul>
+<li>debug.whitelist [on/off] available 8.29.0+</li>
+</ul>
+<p>默认值：打开</p>
+<p>该参数是debug.files的辅助参数。 如果在配置中使用了debug.files，那么debug.whitelist是一个开关，用于从显示调试输出中命名为白名单或黑名单的文件。 如果它被设置为打开，列出的文件将生成调试输出，但不会有其他文件。 如果参数设置为关，则反向原则适用。</p>
+<p>有关更多信息，请参阅debug.files。</p>
+<ul>
+<li>environment [ARRAY of environment variable=value strings] available 8.23.0+</li>
+</ul>
+<p>默认值：无</p>
+<p>这允许通过rsyslog.conf设置环境变量。 这样做的主要动机是，对于许多库，默认值可以通过环境变量来设置，但是通过操作系统服务启动文件来设置它们在不同的平台上是很麻烦和不同的。 所以环境参数提供了一个方便的方法来设置这些变量。</p>
+<p>一个常见的例子是设置http_proxy变量，例如 用于KSI签名或ElasticSearch。 这可以如下完成：</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="title">global</span><span class="params">(environment=<span class="string">"http_proxy=http://myproxy.example.net"</span>)</span></span></span><br></pre></td></tr></table></figure>
+<p>请注意，以这种方式设置的环境变量必须包含等号，并且变量名称不得超过127个字符。</p>
+<p>可以在单个全局语句中设置多个环境变量。 这是用常规的数组语法完成的，如下所示：</p>
+<figure class="highlight jboss-cli"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">global<span class="params">(<span class="attr">environment</span>=["<span class="attr">http_proxy</span>=http://myproxy.example.net",</span></span><br><span class="line"><span class="params">                    "<span class="attr">another_one</span>=this string <span class="attr">is</span>=ok!"</span></span><br><span class="line"><span class="params">      )</span></span><br></pre></td></tr></table></figure>
+<p>像往常一样，空白在参数放置方面是不相关的。 所以上面的例子也可以写在一行上。</p>
+<ul>
+<li>internalmsg.ratelimit.interval [positive integer] available 8.29.0+</li>
+</ul>
+<p>默认：5</p>
+<p>指定将速率限制应用于由rsyslog生成的内部信息包（即错误信息）的时间间隔（以秒为单位）。 如果在该时间间隔内读取超过internalmsg.ratelimit.burst消息，则直至间隔结束的更多消息将被丢弃。</p>
+<ul>
+<li>internalmsg.ratelimit.burst [positive integer] available 8.29.0+</li>
+</ul>
+<p>Default: 500</p>
+<p>指定将速率限制应用于由rsyslog生成的内部信息包（即错误信息）的时间间隔（以秒为单位）。 如果在该时间间隔内读取超过internalmsg.ratelimit.burst消息，则直至间隔结束的更多消息将被丢弃。</p>
+<p>警告：遇到相应的语句时立即设置环境变量。 同样，模块在遇到模块加载语句时加载。 这可能会在rsyslog.conf中创建序列依赖关系。 为避免这种情况，强烈建议在rsyslog.conf的顶部设置环境变量。 而且，rsyslog相关的环境变量可能不适用，即使设置在顶部。 仍然将它们设置在操作系统启动文件中是最安全的。 请注意，rsyslog环境变量通常仅用于开发人员，因此几乎不需要为普通用户设置它们。 而且，许多设置（例如调试）也可用作配置对象。</p>
+<ul>
+<li>errorMessagesToStderr.maxNumber [positive integer] available 8.30.0+</li>
+</ul>
+<p>默认：不限制</p>
+<p>这允许对可以进入标准错误的消息的数量进行严格的限制。 如果没有别的，这个功能对测试平台是有帮助的。 它允许减少垃圾邮件的测试日志，同时仍然提供查看初始错误消息的能力。 对于一些实际的部署可能也是有用的。</p>
+<ul>
+<li>variables.caseSensitve [boolean (on/off)] available 8.30.0+</li>
+</ul>
+<p>默认：关闭</p>
+<p>这可以使变量区分大小写，对于一些特殊的输入数据可能需要哪些情况，只是字段名称的唯一区别。 请注意，在8.30之前的rsyslog版本中，缺省值为“on”，这经常导致用户混淆。 除了需要提及的情况之外，通常不需要将其切换回“开”。 这也是我们切换默认的原因。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/rsyslog/" rel="tag"># rsyslog</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/10/06/Rsyslog-v8学习笔记六-过滤条件/" rel="next" title="Rsyslog-v8学习笔记六(过滤条件)">
+                <i class="fa fa-chevron-left"></i> Rsyslog-v8学习笔记六(过滤条件)
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/11/23/mesos-marathon-docker安装文档/" rel="prev" title="mesos+marathon+docker安装文档">
+                mesos+marathon+docker安装文档 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.gif"
+                alt="devil" />
+            
+              <p class="site-author-name" itemprop="name">devil</p>
+              <p class="site-description motion-element" itemprop="description">Good Good Study！Day Day Up！</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">27</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">18</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/rss2.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/hanjh310" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#RainerScript"><span class="nav-number">1.</span> <span class="nav-text">RainerScript</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Data-Types-（数据类型）"><span class="nav-number">1.1.</span> <span class="nav-text">Data Types （数据类型）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Expressions-（表达式）"><span class="nav-number">1.2.</span> <span class="nav-text">Expressions （表达式）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#functions"><span class="nav-number">1.3.</span> <span class="nav-text">functions</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Control-Structures-（控制结构）"><span class="nav-number">1.4.</span> <span class="nav-text">Control Structures （控制结构）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#configuration-objects"><span class="nav-number">1.5.</span> <span class="nav-text">configuration objects</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Constant-Strings"><span class="nav-number">1.6.</span> <span class="nav-text">Constant Strings</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Variable-Property-types-变量（属性）类型"><span class="nav-number">1.7.</span> <span class="nav-text">Variable (Property) types    变量（属性）类型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Lookup-Tables"><span class="nav-number">1.8.</span> <span class="nav-text">Lookup Tables</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#General-Queue-Parameters"><span class="nav-number">1.9.</span> <span class="nav-text">General Queue Parameters</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#The-rsyslog-“call”-statement"><span class="nav-number">1.10.</span> <span class="nav-text">The rsyslog “call”  statement</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#语法："><span class="nav-number">1.10.1.</span> <span class="nav-text">语法：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#相关链接"><span class="nav-number">1.10.2.</span> <span class="nav-text">相关链接</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#The-rsyslog-“call-indirect”-statement"><span class="nav-number">1.11.</span> <span class="nav-text">The rsyslog “call_indirect” statement</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#语法：-1"><span class="nav-number">1.11.1.</span> <span class="nav-text">语法：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#examples"><span class="nav-number">1.11.2.</span> <span class="nav-text">examples</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#附件信息"><span class="nav-number">1.11.3.</span> <span class="nav-text">附件信息</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#global-configuration-object"><span class="nav-number">1.12.</span> <span class="nav-text">global() configuration object</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">devil</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.3</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://https-blog-loveops-org.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://blog.loveops.com/2016/10/07/Rsyslog-v8学习笔记七-RainerScript/';
+          this.page.identifier = '2016/10/07/Rsyslog-v8学习笔记七-RainerScript/';
+          this.page.title = 'Rsyslog-v8学习笔记七(RainerScript)';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://https-blog-loveops-org.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

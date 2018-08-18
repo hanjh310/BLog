@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="docker," />
+
+
+
+
+
+  <link rel="alternate" href="/rss2.xml" title="LoveOps" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="环境介绍   IP地址 系统版本 主机名 角色     172.16.1.2/24 Ubuntu 16.04.2 LTS k8s-master Kubernetes-master/Kubernetes-node/etcd/flannel   172.16.1.6/24 Ubuntu 16.04.2 LTS k8s-no">
+<meta name="keywords" content="docker">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kubernetes集群部署之flannel">
+<meta property="og:url" content="http://blog.loveops.com/2017/12/28/Kubernetes集群部署之flannel/index.html">
+<meta property="og:site_name" content="LoveOps">
+<meta property="og:description" content="环境介绍   IP地址 系统版本 主机名 角色     172.16.1.2/24 Ubuntu 16.04.2 LTS k8s-master Kubernetes-master/Kubernetes-node/etcd/flannel   172.16.1.6/24 Ubuntu 16.04.2 LTS k8s-node1 Kubernetes-node/etcd/flannel   172.1">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://blog.loveops.com/images/flannel.png">
+<meta property="og:updated_time" content="2017-12-28T07:19:31.560Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Kubernetes集群部署之flannel">
+<meta name="twitter:description" content="环境介绍   IP地址 系统版本 主机名 角色     172.16.1.2/24 Ubuntu 16.04.2 LTS k8s-master Kubernetes-master/Kubernetes-node/etcd/flannel   172.16.1.6/24 Ubuntu 16.04.2 LTS k8s-node1 Kubernetes-node/etcd/flannel   172.1">
+<meta name="twitter:image" content="http://blog.loveops.com/images/flannel.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://blog.loveops.com/2017/12/28/Kubernetes集群部署之flannel/"/>
+
+
+
+
+
+  <title>Kubernetes集群部署之flannel | LoveOps</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">LoveOps</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Devil'Blog</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.loveops.com/2017/12/28/Kubernetes集群部署之flannel/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="devil">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LoveOps">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Kubernetes集群部署之flannel</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-28T15:16:14+08:00">
+                2017-12-28
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/docker-Kubernetes/" itemprop="url" rel="index">
+                    <span itemprop="name">docker Kubernetes</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/12/28/Kubernetes集群部署之flannel/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2017/12/28/Kubernetes集群部署之flannel/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  1,903
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  10
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="环境介绍"><a href="#环境介绍" class="headerlink" title="环境介绍"></a>环境介绍</h3><table>
+<thead>
+<tr>
+<th>IP地址</th>
+<th>系统版本</th>
+<th>主机名</th>
+<th>角色</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>172.16.1.2/24</td>
+<td>Ubuntu 16.04.2 LTS</td>
+<td>k8s-master</td>
+<td>Kubernetes-master/Kubernetes-node/etcd/flannel</td>
+</tr>
+<tr>
+<td>172.16.1.6/24</td>
+<td>Ubuntu 16.04.2 LTS</td>
+<td>k8s-node1</td>
+<td>Kubernetes-node/etcd/flannel</td>
+</tr>
+<tr>
+<td>172.16.1.7/24</td>
+<td>Ubuntu 16.04.2 LTS</td>
+<td>k8s-node2</td>
+<td>Kubernetes-node/etcd/flannel</td>
+</tr>
+</tbody>
+</table>
+<h3 id="在etcd中设置-flannel节点所使用的IP段-（只需要一个节点执行接口）"><a href="#在etcd中设置-flannel节点所使用的IP段-（只需要一个节点执行接口）" class="headerlink" title="在etcd中设置 flannel节点所使用的IP段 （只需要一个节点执行接口）"></a>在etcd中设置 flannel节点所使用的IP段 （只需要一个节点执行接口）</h3><p>在上篇文章中，我们已经介绍了etcd集群的搭建。而flannel需要用到etcd，首先我们需要把网络配置放入etcd中：（注意：我们这里虽然etcd版本是3.2.11，但是flannel不支持v3的api，所以需要用v2的api，/coreos.com/network/config是etcd默认存储路径，也可以自己设定）</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">root@k8s-node1:~# etcdctl -version</span><br><span class="line">etcdctl version: 3.2.11</span><br><span class="line">API version: 2</span><br><span class="line"></span><br><span class="line"><span class="builtin-name">export</span> <span class="attribute">ENDPOINTS</span>=http://172.16.1.2:2379,http://172.16.1.6:2379,http://172.16.1.7:2379</span><br><span class="line"><span class="builtin-name">export</span> <span class="attribute">ETCDCTL_API</span>=2</span><br><span class="line"></span><br><span class="line">etcdctl <span class="attribute">--endpoints</span>=<span class="variable">$ENDPOINTS</span> <span class="builtin-name">set</span> /coreos.com/network<span class="built_in">/config </span>&lt; config.json  </span><br><span class="line"></span><br><span class="line">config.json内容：</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">    <span class="string">"Network"</span>: <span class="string">"10.0.0.0/8"</span>,</span><br><span class="line">    <span class="string">"SubnetMin"</span>: <span class="string">"10.10.0.0"</span>,</span><br><span class="line">    <span class="string">"SubnetMax"</span>: <span class="string">"10.99.0.0"</span>,</span><br><span class="line">    <span class="string">"Backend"</span>: &#123;</span><br><span class="line">        <span class="string">"Type"</span>: <span class="string">"vxlan"</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">root@k8s-master:~# etcdctl <span class="attribute">--endpoints</span>=<span class="variable">$ENDPOINTS</span> <span class="builtin-name">get</span> /coreos.com/network/config</span><br><span class="line">&#123;</span><br><span class="line">    <span class="string">"Network"</span>: <span class="string">"10.0.0.0/8"</span>,</span><br><span class="line">    <span class="string">"SubnetMin"</span>: <span class="string">"10.10.0.0"</span>,</span><br><span class="line">    <span class="string">"SubnetMax"</span>: <span class="string">"10.99.0.0"</span>,</span><br><span class="line">    <span class="string">"Backend"</span>: &#123;</span><br><span class="line">        <span class="string">"Type"</span>: <span class="string">"vxlan"</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="flannel支持不同的backend，一旦设定，在运行时是不能更改的。flannel支持的backend有如下集中，vxlan是官方建议的。"><a href="#flannel支持不同的backend，一旦设定，在运行时是不能更改的。flannel支持的backend有如下集中，vxlan是官方建议的。" class="headerlink" title="flannel支持不同的backend，一旦设定，在运行时是不能更改的。flannel支持的backend有如下集中，vxlan是官方建议的。"></a>flannel支持不同的backend，一旦设定，在运行时是不能更改的。flannel支持的backend有如下集中，vxlan是官方建议的。</h4><ul>
+<li>vxlan</li>
+<li>udp</li>
+<li>host-gw</li>
+</ul>
+<h3 id="flannel安装"><a href="#flannel安装" class="headerlink" title="flannel安装"></a>flannel安装</h3><p>flannel安装比较简单，直接下载相应的版本，然后把二进制和mk-docker-opts.sh两个文件拷贝到PATH变量路径即可。</p>
+<ul>
+<li>flannel 版本</li>
+</ul>
+<figure class="highlight autoit"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">root<span class="symbol">@k8s</span>-master:~<span class="meta"># flanneld  -version</span></span><br><span class="line">v0<span class="number">.9</span><span class="number">.1</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li><p>flannel 启动（三个节点都要安装启动，启动命令一样）</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">flanneld <span class="attribute">-etcd-endpoints</span>=<span class="string">"http://172.16.1.2:2379,http://172.16.1.6:2379,http://172.16.1.7:2379"</span> <span class="attribute">-etcd-prefix</span>=/coreos.com/network</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>flannel 启动参数介绍</p>
+<figure class="highlight haml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">-<span class="ruby">-public-ip =“”：其他节点可以通过IP进行主机间通信。默认为用于通信的接口的IP。</span></span><br><span class="line"><span class="ruby">--etcd-endpoints = <span class="symbol">http:</span>/<span class="regexp">/127.0.0.1:4001：以逗号分隔的etcd端点列表。</span></span></span><br><span class="line"><span class="ruby">--etcd-prefix = <span class="regexp">/coreos.com/network</span>：etcd前缀。</span></span><br><span class="line"><span class="ruby">--etcd-keyfile =“”：用于保护etcd通信的SSL密钥文件。</span></span><br><span class="line"><span class="ruby">--etcd-certfile =“”：用于保护etcd通信的SSL认证文件。</span></span><br><span class="line"><span class="ruby">--etcd-cafile =“”：用于保护etcd通信的SSL证书颁发机构文件。</span></span><br><span class="line"><span class="ruby">--kube-subnet-mgr：联系Kubernetes API进行子网分配而不是etcd。</span></span><br><span class="line"><span class="ruby">--iface = “”：使用（IP或名称）进行主机间通信的接口。默认为机器上默认路由的接口。这可以指定多次，以检查每个选项的顺序。返回找到的第一个匹配项。</span></span><br><span class="line"><span class="ruby">--iface-regex =“”：正则表达式匹配第一个使用（IP或名字）进行主机间通信的接口。如果未指定，则默认为机器上默认路由的接口。这可以指定多次，以检查每个正则表达式。返回找到的第一个匹配项。此选项被iface选项取代，只有在iface选项中指定的选项没有任何匹配时才会使用该选项。</span></span><br><span class="line"><span class="ruby">--subnet-file = <span class="regexp">/run/flannel</span><span class="regexp">/subnet.env：filename其中env变量（子网和MTU值）将被写入。</span></span></span><br><span class="line"><span class="ruby">--subnet-lease-renew-margin = <span class="number">60</span>：子网租约更新余量，以分钟为单位。</span></span><br><span class="line"><span class="ruby">--ip-masq = <span class="literal">false</span>：设置目的地为f网络之外的流量的IP伪装。 Flannel假定NAT POSTROUTING链中的默认策略是ACCEPT。</span></span><br><span class="line"><span class="ruby">-v = <span class="number">0</span>：V日志的日志级别。设置为<span class="number">1</span>以查看与数据路径相关的消息。</span></span><br><span class="line"><span class="ruby">--healthz-ip =“<span class="number">0</span>.<span class="number">0</span>.<span class="number">0</span>.<span class="number">0</span>”：healthz服务器侦听的IP地址（默认为“<span class="number">0</span>.<span class="number">0</span>.<span class="number">0</span>.<span class="number">0</span>”）</span></span><br><span class="line"><span class="ruby">--healthz-port = <span class="number">0</span>：healthz服务器侦听的端口（<span class="number">0</span>表示禁用）</span></span><br><span class="line"><span class="ruby">- version：打印版本并退出</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h3 id="修改docker启动参数-三个几点都操作"><a href="#修改docker启动参数-三个几点都操作" class="headerlink" title="修改docker启动参数(三个几点都操作)"></a>修改docker启动参数(三个几点都操作)</h3><p>flannel启动后，会从etcd获取配置信息，然后划分subnet，并在etcd中注册，然后将子网信息写入到/run/flannel/subnet.env</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">root@k8s-node1:~# cat  /var/run/flannel/subnet.env</span></span><br><span class="line">FLANNEL_NETWORK=10.0.0.0/8</span><br><span class="line">FLANNEL_SUBNET=10.10.40.1/24</span><br><span class="line">FLANNEL_MTU=1450</span><br><span class="line">FLANNEL_IPMASQ=false</span><br></pre></td></tr></table></figure>
+<p>创建docker启动参数：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mk-docker-opts.sh -k DOCKER_NETWORK_OPTIONS -d /run/flannel/docker</span><br><span class="line"></span><br><span class="line"><span class="section">root@k8s-node1:~# cat /run/flannel/docker</span></span><br><span class="line">DOCKER_OPT_BIP=<span class="string">"--bip=10.10.40.1/24"</span></span><br><span class="line">DOCKER_OPT_IPMASQ=<span class="string">"--ip-masq=true"</span></span><br><span class="line">DOCKER_OPT_MTU=<span class="string">"--mtu=1450"</span></span><br><span class="line">DOCKER_NETWORK_OPTIONS=<span class="string">" --bip=10.10.40.1/24 --ip-masq=true --mtu=1450"</span></span><br></pre></td></tr></table></figure>
+<p>修改启动参数：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">root@k8s-node1:~# cat  /lib/systemd/system/docker.service</span></span><br><span class="line">[Unit]</span><br><span class="line">Description=Docker Application Container Engine</span><br><span class="line">Documentation=https://docs.docker.com</span><br><span class="line">After=network-online.target docker.socket firewalld.service</span><br><span class="line">Wants=network-online.target</span><br><span class="line">Requires=docker.socket</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">Type=notify</span><br><span class="line"><span class="comment"># the default is not to use systemd for cgroups because the delegate issues still</span></span><br><span class="line"><span class="comment"># exists and systemd currently does not support the cgroup feature set required</span></span><br><span class="line"><span class="comment"># for containers run by docker</span></span><br><span class="line">ExecStart=/usr/bin/dockerd -H fd://  --bip=10.10.40.1/24 --ip-masq=true --mtu=1450</span><br><span class="line">ExecReload=/bin/kill -s HUP $MAINPID</span><br><span class="line">LimitNOFILE=1048576</span><br><span class="line"><span class="comment"># Having non-zero Limit*s causes performance problems due to accounting overhead</span></span><br><span class="line"><span class="comment"># in the kernel. We recommend using cgroups to do container-local accounting.</span></span><br><span class="line">LimitNPROC=infinity</span><br><span class="line">LimitCORE=infinity</span><br><span class="line"><span class="comment"># Uncomment TasksMax if your systemd version supports it.</span></span><br><span class="line"><span class="comment"># Only systemd 226 and above support this version.</span></span><br><span class="line">TasksMax=infinity</span><br><span class="line">TimeoutStartSec=0</span><br><span class="line"><span class="comment"># set delegate yes so that systemd does not reset the cgroups of docker containers</span></span><br><span class="line">Delegate=yes</span><br><span class="line"><span class="comment"># kill only the docker process, not all processes in the cgroup</span></span><br><span class="line">KillMode=process</span><br><span class="line"><span class="comment"># restart the docker process if it exits prematurely</span></span><br><span class="line">Restart=on-failure</span><br><span class="line">StartLimitBurst=3</span><br><span class="line">StartLimitInterval=60s</span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br></pre></td></tr></table></figure>
+<p>重启docker进程：</p>
+<figure class="highlight coffeescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">root@k8s-node1:~<span class="comment"># systemctl daemon-reload</span></span><br><span class="line">root@k8s-node1:~<span class="comment"># systemctl restart docker.service</span></span><br><span class="line">root@k8s-node1:~<span class="comment"># ps -ef | grep -v grep | grep dockerd</span></span><br><span class="line">root      <span class="number">6228</span>     <span class="number">1</span>  <span class="number">0</span> Dec27 ?        <span class="number">00</span>:<span class="number">03</span>:<span class="number">09</span> /usr<span class="regexp">/bin/dockerd -H fd:/</span>/ --bip=<span class="number">10.10</span><span class="number">.40</span><span class="number">.1</span>/<span class="number">24</span> --ip-masq=<span class="literal">true</span> --mtu=<span class="number">1450</span></span><br></pre></td></tr></table></figure>
+<h3 id="网络测试"><a href="#网络测试" class="headerlink" title="网络测试"></a>网络测试</h3><p>上面我们把flannel搭建起来了。现在测试下网络连通性</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">root@k8s-master:~<span class="comment"># etcdctl --endpoints=$ENDPOINTS ls /coreos.com/network/subnets</span></span><br><span class="line"><span class="regexp">/coreos.com/</span>network<span class="regexp">/subnets/</span><span class="number">10.10</span>.<span class="number">95.0</span>-<span class="number">24</span></span><br><span class="line"><span class="regexp">/coreos.com/</span>network<span class="regexp">/subnets/</span><span class="number">10.10</span>.<span class="number">50.0</span>-<span class="number">24</span></span><br><span class="line"><span class="regexp">/coreos.com/</span>network<span class="regexp">/subnets/</span><span class="number">10.10</span>.<span class="number">40.0</span>-<span class="number">24</span></span><br></pre></td></tr></table></figure>
+<p>可以看到三台分配的子网，我们可以在主机上直接ping通容器网络。</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">root@k8s-master:~#<span class="built_in"> ping </span>-c 2 10.10.40.2</span><br><span class="line">PING 10.10.40.2 (10.10.40.2) 56(84) bytes of data.</span><br><span class="line">64 bytes <span class="keyword">from</span> 10.10.40.2: <span class="attribute">icmp_seq</span>=1 <span class="attribute">ttl</span>=63 <span class="attribute">time</span>=0.699 ms</span><br><span class="line">64 bytes <span class="keyword">from</span> 10.10.40.2: <span class="attribute">icmp_seq</span>=2 <span class="attribute">ttl</span>=63 <span class="attribute">time</span>=0.661 ms</span><br><span class="line"></span><br><span class="line">--- 10.10.40.2<span class="built_in"> ping </span>statistics ---</span><br><span class="line">2 packets transmitted, 2 received, 0% packet loss, time 1000ms</span><br><span class="line">rtt min/avg/max/mdev = 0.661/0.680/0.699/0.019 ms</span><br><span class="line">root@k8s-master:~#<span class="built_in"> ping </span>-c 2 10.10.50.2</span><br><span class="line">PING 10.10.50.2 (10.10.50.2) 56(84) bytes of data.</span><br><span class="line">64 bytes <span class="keyword">from</span> 10.10.50.2: <span class="attribute">icmp_seq</span>=1 <span class="attribute">ttl</span>=64 <span class="attribute">time</span>=0.151 ms</span><br><span class="line">64 bytes <span class="keyword">from</span> 10.10.50.2: <span class="attribute">icmp_seq</span>=2 <span class="attribute">ttl</span>=64 <span class="attribute">time</span>=0.054 ms</span><br><span class="line"></span><br><span class="line">--- 10.10.50.2<span class="built_in"> ping </span>statistics ---</span><br><span class="line">2 packets transmitted, 2 received, 0% packet loss, time 999ms</span><br><span class="line">rtt min/avg/max/mdev = 0.054/0.102/0.151/0.049 ms</span><br><span class="line"></span><br><span class="line">root@k8s-master:~#<span class="built_in"> ping </span>-c 2 10.10.95.1</span><br><span class="line">PING 10.10.95.1 (10.10.95.1) 56(84) bytes of data.</span><br><span class="line">64 bytes <span class="keyword">from</span> 10.10.95.1: <span class="attribute">icmp_seq</span>=1 <span class="attribute">ttl</span>=64 <span class="attribute">time</span>=0.490 ms</span><br><span class="line">64 bytes <span class="keyword">from</span> 10.10.95.1: <span class="attribute">icmp_seq</span>=2 <span class="attribute">ttl</span>=64 <span class="attribute">time</span>=0.458 ms</span><br><span class="line"></span><br><span class="line">--- 10.10.95.1<span class="built_in"> ping </span>statistics ---</span><br><span class="line">2 packets transmitted, 2 received, 0% packet loss, time 1000ms</span><br><span class="line">rtt min/avg/max/mdev = 0.458/0.474/0.490/0.016 ms</span><br></pre></td></tr></table></figure>
+<p>跨主机容器也是可以，这里不在测试。</p>
+<h3 id="flannel实现"><a href="#flannel实现" class="headerlink" title="flannel实现"></a>flannel实现</h3><p>flannel网络拓扑图如下：(下图是upd是示意图，vxlan基本类似)<br><img src="/images/flannel.png" alt=""><br>在k8s-master查看路由表，到容器网络10.10.40.0/24 和 10.10.95.0/24 的数据包会发送到flannel.1，flannel.1将数据封装成vxlan，通过网卡eth发送另外主机</p>
+<figure class="highlight x86asm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">root@k8s-master:~# <span class="built_in">ip</span> r</span><br><span class="line"><span class="meta">default</span> via <span class="number">172.16</span><span class="meta">.1</span><span class="meta">.1</span> dev eth0</span><br><span class="line"><span class="number">10.0</span><span class="meta">.0</span><span class="meta">.0</span>/<span class="number">8</span> dev flannel<span class="meta">.1</span></span><br><span class="line"><span class="number">10.10</span><span class="meta">.40</span><span class="meta">.0</span>/<span class="number">24</span> via <span class="number">10.10</span><span class="meta">.40</span><span class="meta">.0</span> dev flannel<span class="meta">.1</span> onlink</span><br><span class="line"><span class="number">10.10</span><span class="meta">.50</span><span class="meta">.0</span>/<span class="number">24</span> dev docker0  proto kernel  scope link  src <span class="number">10.10</span><span class="meta">.50</span><span class="meta">.1</span></span><br><span class="line">c via <span class="number">10.10</span><span class="meta">.95</span><span class="meta">.0</span> dev flannel<span class="meta">.1</span> onlink</span><br><span class="line"><span class="number">172.16</span><span class="meta">.1</span><span class="meta">.0</span>/<span class="number">24</span> dev eth0  proto kernel  scope link  src <span class="number">172.16</span><span class="meta">.1</span><span class="meta">.2</span></span><br><span class="line"><span class="number">172.18</span><span class="meta">.0</span><span class="meta">.0</span>/<span class="number">16</span> dev docker_gwbridge  proto kernel  scope link  src <span class="number">172.18</span><span class="meta">.0</span><span class="meta">.1</span> linkdown</span><br></pre></td></tr></table></figure>
+<p>flannel网络中容器与外网联通的方式与bridge一样，也是通过nat方式。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/docker/" rel="tag"># docker</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/12/25/Kubernetes集群部署之etcd/" rel="next" title="Kubernetes集群部署之etcd">
+                <i class="fa fa-chevron-left"></i> Kubernetes集群部署之etcd
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.gif"
+                alt="devil" />
+            
+              <p class="site-author-name" itemprop="name">devil</p>
+              <p class="site-description motion-element" itemprop="description">Good Good Study！Day Day Up！</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">27</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">18</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/rss2.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/hanjh310" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#环境介绍"><span class="nav-number">1.</span> <span class="nav-text">环境介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#在etcd中设置-flannel节点所使用的IP段-（只需要一个节点执行接口）"><span class="nav-number">2.</span> <span class="nav-text">在etcd中设置 flannel节点所使用的IP段 （只需要一个节点执行接口）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#flannel支持不同的backend，一旦设定，在运行时是不能更改的。flannel支持的backend有如下集中，vxlan是官方建议的。"><span class="nav-number">2.1.</span> <span class="nav-text">flannel支持不同的backend，一旦设定，在运行时是不能更改的。flannel支持的backend有如下集中，vxlan是官方建议的。</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#flannel安装"><span class="nav-number">3.</span> <span class="nav-text">flannel安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#修改docker启动参数-三个几点都操作"><span class="nav-number">4.</span> <span class="nav-text">修改docker启动参数(三个几点都操作)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#网络测试"><span class="nav-number">5.</span> <span class="nav-text">网络测试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#flannel实现"><span class="nav-number">6.</span> <span class="nav-text">flannel实现</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">devil</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.3</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://https-blog-loveops-org.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://blog.loveops.com/2017/12/28/Kubernetes集群部署之flannel/';
+          this.page.identifier = '2017/12/28/Kubernetes集群部署之flannel/';
+          this.page.title = 'Kubernetes集群部署之flannel';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://https-blog-loveops-org.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

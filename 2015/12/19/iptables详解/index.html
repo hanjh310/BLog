@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="iptables," />
+
+
+
+
+
+  <link rel="alternate" href="/rss2.xml" title="LoveOps" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="iptables介绍iptables 是一个配置linux内核防火墙的命令行工具，是netfilter项目的一部分，netfilter才是真正的防火墙框架，netfilter位于内核空间，iptables位于用户空间。一般情况下，我们说iptables也代指内核防火墙 iptables 4表5链4表： raw 用于配置">
+<meta name="keywords" content="iptables">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iptables详解">
+<meta property="og:url" content="http://blog.loveops.com/2015/12/19/iptables详解/index.html">
+<meta property="og:site_name" content="LoveOps">
+<meta property="og:description" content="iptables介绍iptables 是一个配置linux内核防火墙的命令行工具，是netfilter项目的一部分，netfilter才是真正的防火墙框架，netfilter位于内核空间，iptables位于用户空间。一般情况下，我们说iptables也代指内核防火墙 iptables 4表5链4表： raw 用于配置数据包，raw 中的数据包不会被系统跟踪。 filter  用于配置数据包，ra">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://blog.loveops.com/images/iptables.png">
+<meta property="og:updated_time" content="2017-12-19T14:57:56.178Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="iptables详解">
+<meta name="twitter:description" content="iptables介绍iptables 是一个配置linux内核防火墙的命令行工具，是netfilter项目的一部分，netfilter才是真正的防火墙框架，netfilter位于内核空间，iptables位于用户空间。一般情况下，我们说iptables也代指内核防火墙 iptables 4表5链4表： raw 用于配置数据包，raw 中的数据包不会被系统跟踪。 filter  用于配置数据包，ra">
+<meta name="twitter:image" content="http://blog.loveops.com/images/iptables.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://blog.loveops.com/2015/12/19/iptables详解/"/>
+
+
+
+
+
+  <title>iptables详解 | LoveOps</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">LoveOps</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Devil'Blog</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.loveops.com/2015/12/19/iptables详解/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="devil">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LoveOps">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">iptables详解</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-12-19T21:56:59+08:00">
+                2015-12-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/linux/" itemprop="url" rel="index">
+                    <span itemprop="name">linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2015/12/19/iptables详解/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2015/12/19/iptables详解/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  2,674
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  10
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h4 id="iptables介绍"><a href="#iptables介绍" class="headerlink" title="iptables介绍"></a>iptables介绍</h4><p>iptables 是一个配置linux内核防火墙的命令行工具，是netfilter项目的一部分，netfilter才是真正的防火墙框架，netfilter位于内核空间，iptables位于用户空间。一般情况下，我们说iptables也代指内核防火墙</p>
+<h4 id="iptables-4表5链"><a href="#iptables-4表5链" class="headerlink" title="iptables 4表5链"></a>iptables 4表5链</h4><h5 id="4表："><a href="#4表：" class="headerlink" title="4表："></a>4表：</h5><ul>
+<li>raw 用于配置数据包，raw 中的数据包不会被系统跟踪。</li>
+<li>filter  用于配置数据包，raw 中的数据包不会被系统跟踪。</li>
+<li>nat 用户网络地址转换</li>
+<li>mangle 用于对特定数据包的修改</li>
+</ul>
+<h5 id="5链"><a href="#5链" class="headerlink" title="5链"></a>5链</h5><ul>
+<li>prerouting</li>
+<li>input</li>
+<li>forward</li>
+<li>output</li>
+<li>postrouting</li>
+</ul>
+<h5 id="iptables数据流向"><a href="#iptables数据流向" class="headerlink" title="iptables数据流向"></a>iptables数据流向</h5><p><img src="/images/iptables.png" alt=""></p>
+<p>通过上图可以看出数据包有三个流向：</p>
+<ul>
+<li>到本机进程的报文: PREROUTING–&gt;INPUT</li>
+<li>有本机转发的报文: PREROUTING–&gt;FORWORD–&gt;POSTROUTING</li>
+<li>本机进程出去的报文： OUTPUT–&gt;POSTROUTING</li>
+</ul>
+<h5 id="ipables语法："><a href="#ipables语法：" class="headerlink" title="ipables语法："></a>ipables语法：</h5><figure class="highlight accesslog"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iptables <span class="string">[-t table]</span> command <span class="string">[match]</span> <span class="string">[target/jump]</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>command:</li>
+</ul>
+<figure class="highlight haml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">-<span class="ruby">A, --append chain rule-specification   	在所选择的链末添加规则。当源地址或目的地址是以名字而 不是ip地址的形式出现时，若这些名字可以被解析为多个地址，则这条规则会和所有可用的地址结合。</span></span><br><span class="line"><span class="ruby">-D, --delete chain rule-specification </span></span><br><span class="line"><span class="ruby">    --delete chain rule-specification    从所选链中删除规则。有两种方法指定要删除的规则：一是 把规则完完整整地写出来，再就是指定规则在所选链中的序号（每条链的规则都各自从<span class="number">1</span>被编号）。</span></span><br><span class="line"><span class="ruby">-I, --insert chain [rulenum] rule-specification      根据给出的规则序号向所选链中插入规则。如果序号为<span class="number">1</span>， 规则会被插入链的头部，其实默认序号就是<span class="number">1</span>。</span></span><br><span class="line"><span class="ruby">-R, --replace chain rulenum rule-specification       在所选中的链里指定的行上（每条链的规则都各自从<span class="number">1</span>被编 号）替换规则。它主要的用处是试验不同的规则。当源地址或目的地址是以名字而不是ip地址的形式出现 时，若这些名字可以被解析为多个地址，则这条command会失败</span></span><br><span class="line"><span class="ruby">-F，--flush [chain]      清空所选的链。如果没有指定链，则清空指定表中的所有 链。如果什么都没有指定，就清空默认表所有的链。当然，也可以一条一条地删，但用这个command会快些。</span></span><br><span class="line"><span class="ruby">-Z, --zero [chain [rulenum]]   把指定链（如未指定，则认为是所有链）的所有计数器归 零。</span></span><br><span class="line"><span class="ruby">-N, --new-chain chain 新建一个用户自定义链，所用的名字不能和已有的链、target同名。</span></span><br><span class="line"><span class="ruby">-X, --delete-chain [chain] 删除指定的用户自定义链。这个链必须没有被引用，如果被 引用，在删除之前你必须删除或者替换与之有关的规则。如果没有给出参数，这条命令将会删除默认表所有 非内建的链。</span></span><br><span class="line"><span class="ruby">-P, --policy chain target 为链设置默认的target，这个target称作策略。所有不 符合规则的包都被强制使用这个策略。只有内建的链才可以使用规则。</span></span><br><span class="line"><span class="ruby">-L，--list [chain]  显示所选链的所有规则。如果没有指定链，则显示指定表中 的所有链。如果什么都没有指定，就显示默认表所有的链。</span></span><br><span class="line"><span class="ruby"></span></span><br><span class="line"><span class="ruby">与-L配合使用的</span></span><br><span class="line"><span class="ruby">-n  使输出中的IP地址和端口以数值的形式显示</span></span><br><span class="line"><span class="ruby">-v  显示详细信息</span></span><br><span class="line"><span class="ruby">--line-numbers 显示行号</span></span><br><span class="line"><span class="ruby">-x  使输出中的IP地址和端口以数值的形式显示</span></span><br></pre></td></tr></table></figure>
+<h4 id="match："><a href="#match：" class="headerlink" title="match："></a>match：</h4><h5 id="通用匹配"><a href="#通用匹配" class="headerlink" title="通用匹配"></a>通用匹配</h5><figure class="highlight haml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">-<span class="ruby">s 源地址 可以是ip地址或则 network/mask</span></span><br><span class="line"><span class="ruby">-d 目的地址 可以是ip地址或则 network/mask</span></span><br><span class="line"><span class="ruby">-i 进入网卡地址 例如：eth<span class="number">0</span></span></span><br><span class="line"><span class="ruby">-o 出去网卡地址 例如：eth<span class="number">0</span></span></span><br></pre></td></tr></table></figure>
+<h5 id="扩展匹配"><a href="#扩展匹配" class="headerlink" title="扩展匹配"></a>扩展匹配</h5><h6 id="隐式扩展"><a href="#隐式扩展" class="headerlink" title="隐式扩展"></a>隐式扩展</h6><figure class="highlight haml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">-<span class="ruby">p tcp</span></span><br><span class="line"><span class="ruby">   --sport  源端口，也可以是端口范围，比如：<span class="number">1000</span>-<span class="number">2000</span></span></span><br><span class="line"><span class="ruby">   --dport  目的端口，也可以是端口范围，比如：<span class="number">1000</span>-<span class="number">2000</span></span></span><br><span class="line"><span class="ruby">   --tcp-flags </span></span><br><span class="line"><span class="ruby">   --syn</span></span><br><span class="line"><span class="ruby">-p udp</span></span><br><span class="line"><span class="ruby">   --sport  源端口，也可以是端口范围，比如：<span class="number">1000</span>-<span class="number">2000</span></span></span><br><span class="line"><span class="ruby">   --dport  目的端口，也可以是端口范围，比如：<span class="number">1000</span>-<span class="number">2000</span></span></span><br><span class="line"><span class="ruby">   </span></span><br><span class="line"><span class="ruby">-p icmp</span></span><br><span class="line"><span class="ruby">   --icmp-type 常见的 <span class="number">0</span>: echo-reply , <span class="number">8</span>: echo-request</span></span><br></pre></td></tr></table></figure>
+<h6 id="显示扩展"><a href="#显示扩展" class="headerlink" title="显示扩展"></a>显示扩展</h6><p>显式匹配必须用-m或–match装载，比如要使用状态匹配 就必须使用-m state。有些匹配还需要指定协议，有些就不需要，比如连接状态就不要</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">-m</span> <span class="selector-tag">state</span>  </span><br><span class="line">   <span class="selector-tag">--state</span> </span><br><span class="line">有4种状态</span><br><span class="line"><span class="selector-tag">INVALID</span> ： 意味着这个包没有已知的流或连接与之关 联，也可能是它包含的数据或包头有问题</span><br><span class="line"><span class="selector-tag">ESTABLISHED</span> ： 一个已经建立的链接</span><br><span class="line"><span class="selector-tag">NEW</span> ：建立一个新的链接</span><br><span class="line"><span class="selector-tag">RELATED</span> ： 包正在建立一个新的连接，这个连接是和一个已建立的连接相关的</span><br><span class="line"></span><br><span class="line"><span class="selector-tag">-m</span> <span class="selector-tag">multiport</span> </span><br><span class="line">    –<span class="selector-tag">source-port</span> 源端口多端口匹配，最多可以指定15个端口，以英文逗号分 隔，注意没有空格。使用时必须有<span class="selector-tag">-p</span> <span class="selector-tag">tcp</span>或<span class="selector-tag">-p</span> <span class="selector-tag">udp</span>为前提条 件。</span><br><span class="line">    –<span class="selector-tag">destination-port</span> 目的端口多端口匹配，使用方法和源端口多端口匹配一样， 唯一的区别是它匹配的是目的端口。</span><br><span class="line">    –<span class="selector-tag">port</span> 同端口多端口匹配，意思就是它匹配的是那种源端口和目的 端口是同一个端口的包，比如：端口80到端口80的包，110到110的包等。使用方法和源端口多端口匹配一 样。</span><br><span class="line"></span><br><span class="line"><span class="selector-tag">-m</span> <span class="selector-tag">mac</span></span><br><span class="line">     –<span class="selector-tag">mac-source</span> 基于包的<span class="selector-tag">MAC</span>源地址匹配包，地址格式只能是<span class="selector-tag">XX</span><span class="selector-pseudo">:XX</span><span class="selector-pseudo">:XX</span><span class="selector-pseudo">:XX</span><span class="selector-pseudo">:XX</span><span class="selector-pseudo">:XX</span>，当然它也可以用英文感叹号取反，如–<span class="selector-tag">mac-</span> <span class="selector-tag">source</span> ! 00<span class="selector-pseudo">:00</span><span class="selector-pseudo">:00</span><span class="selector-pseudo">:00</span><span class="selector-pseudo">:00</span><span class="selector-pseudo">:01</span>，意思很简单了，就是除此之外的地址都可接受嘛。注意，因为 <span class="selector-tag">MAC</span> <span class="selector-tag">addresses</span>只用于<span class="selector-tag">Ethernet</span>类型的网络，所以这个<span class="selector-tag">match</span>只能用于<span class="selector-tag">Ethernet</span>接 口。而且，它还只能在<span class="selector-tag">PREROUTING</span>，<span class="selector-tag">FORWARD</span> 和<span class="selector-tag">INPUT</span>链里使用。</span><br></pre></td></tr></table></figure>
+<h4 id="jump-target"><a href="#jump-target" class="headerlink" title="jump/target"></a>jump/target</h4><ul>
+<li>ACCEPT </li>
+</ul>
+<p>++这个target不需要进一步的选项。只要一个数据包的匹配规范已经完全满足，并且我们指定ACCEPT作为target，规则就被接受，并且不会继续遍历当前链或者同一个表中的其他链。但是请注意，一个链中接受的数据包仍然可以穿过其他表中的链，并且仍然可以在这里DROP。这个target没有什么特别之处，也不需要，也没有可能为目标增加选项。要使用这个目标，我们只需指定-j ACCEPT。++</p>
+<ul>
+<li>DROP</li>
+</ul>
+<p>DROP的目标就如字面意思一样，它会丢弃数据包，不会执行任何进一步的处理。完美匹配规则的数据包然后被丢弃将被阻止。请注意，此操作在某些情况下可能会产生不必要的影响，因为它可能会在任一主机上留下死穴。在可能的情况下，更好的解决方案是使用REJECT目标，尤其是当您想要阻止端口扫描程序获取太多信息时，例如在过滤的端口上等等。还要注意的是，如果一个数据包在子链上采取了DROP动作，那么数据包将不会在任何主链中或在任何其他表中被处理。换句话说，数据包完全死了。正如我们以前所看到的，目标不会向任何方向发送任何类型的信息，也不会向路由器等中介发送任何信息。</p>
+<ul>
+<li>REJECT</li>
+</ul>
+<p>拦阻该数据包，并返回数据包通知对方，可以返回的数据包有几个选择：ICMP port-unreachable、ICMP echo-reply 或是tcp-reset（这个数据包包会要求对方关闭联机），进行完此处理动作后，将不再比对其它规则，直接中断过滤程序。 范例如下：</p>
+<figure class="highlight brainfuck"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">iptables</span> <span class="literal">-</span><span class="comment">A</span>  <span class="comment">INPUT</span> <span class="literal">-</span><span class="comment">p</span> <span class="comment">TCP</span> <span class="literal">-</span><span class="literal">-</span><span class="comment">dport</span> <span class="comment">22</span> <span class="literal">-</span><span class="comment">j</span> <span class="comment">REJECT</span> <span class="literal">-</span><span class="literal">-</span><span class="comment">reject</span><span class="literal">-</span><span class="comment">with</span> <span class="comment">ICMP</span> <span class="comment">echo</span><span class="literal">-</span><span class="comment">reply</span></span><br></pre></td></tr></table></figure>
+<p>–reject-with参数说明拒绝的原因</p>
+<ul>
+<li>SNAT</li>
+</ul>
+<p>改写封包来源 IP 为某特定 IP 或 IP 范围，可以指定 port 对应的范围，进行完此处理动作后，将直接跳往下一个规则炼（mangle:postrouting）</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iptables -t<span class="built_in"> nat </span>-A POSTROUTING -p tcp -o eth0 -j SNAT --to-source 192.168.10.15-192.168.10.160:2100-3200</span><br></pre></td></tr></table></figure>
+<ul>
+<li>DNAT</li>
+</ul>
+<p>DNAT目标被用来做目标网络地址转换，这意味着它被用来重写数据包的目标IP地址。如果数据包匹配，这是规则的目标，则数据包以及同一个数据流中的所有后续数据包将被转换，然后路由到正确的设备，主机或网络。这个目标可以是非常有用的，例如，当你有一个主机在局域网内运行你的网络服务器，但没有真正的IP给它，将在互联网上工作。然后你可以告诉防火墙将所有的数据包转发到它自己的HTTP端口，然后转发到局域网内的真实网络服务器上。我们也可以指定一个完整的目标IP地址范围，DNAT机制将为每个流随机选择目的IP地址。因此，我们可以通过这样做来处理一种负载平衡。</p>
+<p>请注意，DNAT目标仅在nat表中的PREROUTING和OUTPUT链中可用，以及从任何列出的链中调用的任何链。请注意，包含DNAT目标的链可能不能用于任何其他链，如POSTROUTING链。</p>
+<p>参数：</p>
+<figure class="highlight lsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">--to-destination</span><br><span class="line"></span><br><span class="line">iptables -t nat -A PREROUTING -p tcp -d <span class="number">15.45</span><span class="number">.23</span><span class="number">.67</span> --dport <span class="number">80</span> -j DNAT --to-destination <span class="number">192.168</span><span class="number">.1</span><span class="number">.1</span><span class="number">-192.168</span><span class="number">.1</span><span class="number">.10</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">--to-destination参数告诉DNAT机制，要指向的真是的目的地址或者地址范围。上面例子即是把目的地址为<span class="number">15.45</span><span class="number">.23</span><span class="number">.67</span>端口为<span class="number">80</span>的所有包，到转发到<span class="number">192.168</span><span class="number">.1</span><span class="number">.1</span>到<span class="number">192.168</span><span class="number">.1</span><span class="number">.10</span>的<span class="number">80</span>端口</span><br></pre></td></tr></table></figure>
+<ul>
+<li>MASQUERADE</li>
+</ul>
+<p>改写封包来源IP为防火墙的IP，可以指定port 对应的范围，进行完此处理动作后，直接跳往下一个规则链（mangle:postrouting）。这个功能与 SNAT 略有不同，当进行IP 伪装时，不需指定要伪装成哪个 IP，IP 会从网卡直接读取，当使用拨接连线时，IP 通常是由 ISP 公司的 DHCP服务器指派的，这个时候 MASQUERADE 特别有用。范例如下：</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iptables -t<span class="built_in"> nat </span>-A POSTROUTING -p TCP -j MASQUERADE --to-ports 21000-31000</span><br></pre></td></tr></table></figure>
+<ul>
+<li>REDIRECT</li>
+</ul>
+<p>将封包重新导向到另一个端口（PNAT），进行完此处理动作后，将会继续比对其它规则。这个功能可以用来实作透明代理 或用来保护web 服务器。例如：</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iptables -t<span class="built_in"> nat </span>-A PREROUTING -p tcp --dport 80 -j REDIRECT--to-ports 8081</span><br></pre></td></tr></table></figure>
+<p>参考：<br><a href="http://www.zsythink.net/archives/1199" target="_blank" rel="noopener">http://www.zsythink.net/archives/1199</a><br><a href="http://www.iptables.info/en/structure-of-iptables.html" target="_blank" rel="noopener">http://www.iptables.info/en/structure-of-iptables.html</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/iptables/" rel="tag"># iptables</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/11/23/OSX无共享的密钥情况下连接基于L2TP协议的VPN/" rel="next" title="OSX无共享的密钥情况下连接基于L2TP协议的VPN">
+                <i class="fa fa-chevron-left"></i> OSX无共享的密钥情况下连接基于L2TP协议的VPN
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/10/01/rsyslog-v8学习笔记一-基本结构/" rel="prev" title="rsyslog-v8学习笔记一(基本结构)">
+                rsyslog-v8学习笔记一(基本结构) <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.gif"
+                alt="devil" />
+            
+              <p class="site-author-name" itemprop="name">devil</p>
+              <p class="site-description motion-element" itemprop="description">Good Good Study！Day Day Up！</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">27</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">18</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/rss2.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/hanjh310" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#iptables介绍"><span class="nav-number">1.</span> <span class="nav-text">iptables介绍</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#iptables-4表5链"><span class="nav-number">2.</span> <span class="nav-text">iptables 4表5链</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#4表："><span class="nav-number">2.1.</span> <span class="nav-text">4表：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#5链"><span class="nav-number">2.2.</span> <span class="nav-text">5链</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#iptables数据流向"><span class="nav-number">2.3.</span> <span class="nav-text">iptables数据流向</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#ipables语法："><span class="nav-number">2.4.</span> <span class="nav-text">ipables语法：</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#match："><span class="nav-number">3.</span> <span class="nav-text">match：</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#通用匹配"><span class="nav-number">3.1.</span> <span class="nav-text">通用匹配</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#扩展匹配"><span class="nav-number">3.2.</span> <span class="nav-text">扩展匹配</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#隐式扩展"><span class="nav-number">3.2.1.</span> <span class="nav-text">隐式扩展</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#显示扩展"><span class="nav-number">3.2.2.</span> <span class="nav-text">显示扩展</span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#jump-target"><span class="nav-number">4.</span> <span class="nav-text">jump/target</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">devil</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.3</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://https-blog-loveops-org.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://blog.loveops.com/2015/12/19/iptables详解/';
+          this.page.identifier = '2015/12/19/iptables详解/';
+          this.page.title = 'iptables详解';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://https-blog-loveops-org.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="etcd," />
+
+
+
+
+
+  <link rel="alternate" href="/rss2.xml" title="LoveOps" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="总体介绍Kubernetes是一个开源平台，旨在自动部署，扩展和运行应用程序容器。 通过Kubernetes，您可以快速高效地响应客户需求：  快速和可预测地部署您的应用程序。 随时扩展您的应用程序。 无缝地推出新功能。 仅限硬件使用情况为所需资源。  我们的目标是建立一个组件和工具的生态系统，减轻在公共和私有云中运行">
+<meta name="keywords" content="etcd">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kubernetes集群部署之etcd">
+<meta property="og:url" content="http://blog.loveops.com/2017/12/25/Kubernetes集群部署之etcd/index.html">
+<meta property="og:site_name" content="LoveOps">
+<meta property="og:description" content="总体介绍Kubernetes是一个开源平台，旨在自动部署，扩展和运行应用程序容器。 通过Kubernetes，您可以快速高效地响应客户需求：  快速和可预测地部署您的应用程序。 随时扩展您的应用程序。 无缝地推出新功能。 仅限硬件使用情况为所需资源。  我们的目标是建立一个组件和工具的生态系统，减轻在公共和私有云中运行应用程序的负担。 Kubernetes特点：  便携式：公共，私人，混合，多云">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-12-25T11:48:35.498Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Kubernetes集群部署之etcd">
+<meta name="twitter:description" content="总体介绍Kubernetes是一个开源平台，旨在自动部署，扩展和运行应用程序容器。 通过Kubernetes，您可以快速高效地响应客户需求：  快速和可预测地部署您的应用程序。 随时扩展您的应用程序。 无缝地推出新功能。 仅限硬件使用情况为所需资源。  我们的目标是建立一个组件和工具的生态系统，减轻在公共和私有云中运行应用程序的负担。 Kubernetes特点：  便携式：公共，私人，混合，多云">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://blog.loveops.com/2017/12/25/Kubernetes集群部署之etcd/"/>
+
+
+
+
+
+  <title>Kubernetes集群部署之etcd | LoveOps</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">LoveOps</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Devil'Blog</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.loveops.com/2017/12/25/Kubernetes集群部署之etcd/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="devil">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LoveOps">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Kubernetes集群部署之etcd</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-25T19:44:55+08:00">
+                2017-12-25
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/docker-Kubernetes/" itemprop="url" rel="index">
+                    <span itemprop="name">docker Kubernetes</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/12/25/Kubernetes集群部署之etcd/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2017/12/25/Kubernetes集群部署之etcd/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  2,438
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  11
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="总体介绍"><a href="#总体介绍" class="headerlink" title="总体介绍"></a>总体介绍</h3><p>Kubernetes是一个开源平台，旨在自动部署，扩展和运行应用程序容器。</p>
+<p>通过Kubernetes，您可以快速高效地响应客户需求：</p>
+<ul>
+<li>快速和可预测地部署您的应用程序。</li>
+<li>随时扩展您的应用程序。</li>
+<li>无缝地推出新功能。</li>
+<li>仅限硬件使用情况为所需资源。</li>
+</ul>
+<p>我们的目标是建立一个组件和工具的生态系统，减轻在公共和私有云中运行应用程序的负担。</p>
+<p>Kubernetes特点：</p>
+<ul>
+<li>便携式：公共，私人，混合，多云</li>
+<li>可扩展：模块化，可插拔，可挂接，可组合</li>
+<li>自我修复：自动放置，自动重启，自动复制，自动缩放</li>
+</ul>
+<p>Google在2014年启动了Kubernetes项目.Kubernetes建立在Google大规模运行生产工作量的十五年经验的基础上，结合社区最佳的创意和实践。</p>
+<p>从本篇文章开始我们将部署一步一步部署k8s集群。由于k8s的网络我认为是比较复杂的，我们就从网络开始。k8s默认的网络为flannel，那么我们就从flannel开始，由于flannel需要etcd的支持，我们本篇文章就先介绍etcd。</p>
+<h3 id="etcd介绍"><a href="#etcd介绍" class="headerlink" title="etcd介绍"></a>etcd介绍</h3><p>etcd是一个开源的分布式键值存储，提供了一个可靠的方式来存储跨机器集群的数据。 etcd在网络分区时优雅地处理领导选举，并容忍包括领导在内的机器故障。</p>
+<p>您的应用程序可以读取和写入数据到etcd。 一个简单的用例是将数据库连接详细信息或功能标志作为关键值对存储在etcd中。 可以监视这些值，允许您的应用在更改时自行重新配置。</p>
+<h3 id="环境介绍"><a href="#环境介绍" class="headerlink" title="环境介绍"></a>环境介绍</h3><table>
+<thead>
+<tr>
+<th>IP地址</th>
+<th>系统版本</th>
+<th>主机名</th>
+<th>角色</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>172.16.1.2/24</td>
+<td>Ubuntu 16.04.2 LTS</td>
+<td>k8s-master</td>
+<td>Kubernetes-master/Kubernetes-node/etcd/flannel</td>
+</tr>
+<tr>
+<td>172.16.1.6/24</td>
+<td>Ubuntu 16.04.2 LTS</td>
+<td>k8s-node1</td>
+<td>Kubernetes-node/etcd/flannel</td>
+</tr>
+<tr>
+<td>172.16.1.7/24</td>
+<td>Ubuntu 16.04.2 LTS</td>
+<td>k8s-node2</td>
+<td>Kubernetes-node/etcd/flannel</td>
+</tr>
+</tbody>
+</table>
+<h3 id="etcd安装"><a href="#etcd安装" class="headerlink" title="etcd安装"></a>etcd安装</h3><p>etcd是有go语言编写的，我们直接下载编译好的二进制文件即可，下载解压后有两个二进制文件etcd和etcdctl。把这两个文件放入/usr/local/sbin即可。我们这里采用的版本如下：</p>
+<figure class="highlight ldif"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">root@k8s-node1:~# etcd -version</span></span><br><span class="line"><span class="attribute">etcd Version</span>: 3.2.11</span><br><span class="line"><span class="attribute">Git SHA</span>: 1e1dbb2</span><br><span class="line"><span class="attribute">Go Version</span>: go1.8.5</span><br><span class="line"><span class="attribute">Go OS/Arch</span>: linux/amd64</span><br></pre></td></tr></table></figure>
+<h3 id="启动etcd集群"><a href="#启动etcd集群" class="headerlink" title="启动etcd集群"></a>启动etcd集群</h3><ul>
+<li><p>k8s-master</p>
+<figure class="highlight jboss-cli"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">etcd <span class="params">--data-dir=/var/lib/etcd</span> <span class="params">--name</span> etcd_one \</span><br><span class="line">	<span class="params">--initial-advertise-peer-urls</span> http:<span class="string">//172.16.1.2</span><span class="function">:2380</span> <span class="params">--listen-peer-urls</span> http:<span class="string">//172.16.1.2</span><span class="function">:2380</span> \</span><br><span class="line">	<span class="params">--advertise-client-urls</span> http:<span class="string">//172.16.1.2</span><span class="function">:2379</span> <span class="params">--listen-client-urls</span> http:<span class="string">//172.16.1.2</span><span class="function">:2379</span> \</span><br><span class="line">	<span class="params">--initial-cluster</span> etcd_one=http:<span class="string">//172.16.1.2</span><span class="function">:2380</span>,etcd_two=http:<span class="string">//172.16.1.6</span><span class="function">:2380</span>,etcd_thr=http:<span class="string">//172.16.1.7</span><span class="function">:2380</span> \</span><br><span class="line">	<span class="params">--initial-cluster-state</span> new <span class="params">--initial-cluster-token</span>  test-token</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>k8s-node1</p>
+<figure class="highlight jboss-cli"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">etcd <span class="params">--data-dir=/var/lib/etcd</span> <span class="params">--name</span> etcd_two \</span><br><span class="line">	<span class="params">--initial-advertise-peer-urls</span> http:<span class="string">//172.16.1.6</span><span class="function">:2380</span> <span class="params">--listen-peer-urls</span> http:<span class="string">//172.16.1.6</span><span class="function">:2380</span> \</span><br><span class="line">	<span class="params">--advertise-client-urls</span> http:<span class="string">//172.16.1.6</span><span class="function">:2379</span> <span class="params">--listen-client-urls</span> http:<span class="string">//172.16.1.6</span><span class="function">:2379</span> \</span><br><span class="line">	<span class="params">--initial-cluster</span> etcd_one=http:<span class="string">//172.16.1.2</span><span class="function">:2380</span>,etcd_two=http:<span class="string">//172.16.1.6</span><span class="function">:2380</span>,etcd_thr=http:<span class="string">//172.16.1.7</span><span class="function">:2380</span> \</span><br><span class="line">	<span class="params">--initial-cluster-state</span> new <span class="params">--initial-cluster-token</span> test-token</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>k8s-node2</p>
+</li>
+</ul>
+<figure class="highlight jboss-cli"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">etcd <span class="params">--data-dir=/var/lib/etcd</span> <span class="params">--name</span> etcd_thr \</span><br><span class="line">	<span class="params">--initial-advertise-peer-urls</span> http:<span class="string">//172.16.1.7</span><span class="function">:2380</span> <span class="params">--listen-peer-urls</span> http:<span class="string">//172.16.1.7</span><span class="function">:2380</span> \</span><br><span class="line">	<span class="params">--advertise-client-urls</span> http:<span class="string">//172.16.1.7</span><span class="function">:2379</span> <span class="params">--listen-client-urls</span> http:<span class="string">//172.16.1.7</span><span class="function">:2379</span> \</span><br><span class="line">	<span class="params">--initial-cluster</span> etcd_one=http:<span class="string">//172.16.1.2</span><span class="function">:2380</span>,etcd_two=http:<span class="string">//172.16.1.6</span><span class="function">:2380</span>,etcd_thr=http:<span class="string">//172.16.1.7</span><span class="function">:2380</span> \</span><br><span class="line">	<span class="params">--initial-cluster-state</span> new <span class="params">--initial-cluster-token</span> test-token</span><br></pre></td></tr></table></figure>
+<p>注意: –initial-cluster 可以直接指定列表意外，还可以用–discovery具体参考官方文档：<br><a href="https://coreos.com/etcd/docs/latest/op-guide/clustering.html" target="_blank" rel="noopener">https://coreos.com/etcd/docs/latest/op-guide/clustering.html</a></p>
+<p>安装完成后可以验证：</p>
+<figure class="highlight asciidoc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">root@k8s-master:~# export ETCDCTL<span class="emphasis">_API=3</span></span><br><span class="line"><span class="emphasis">root@k8s-master:~# export ENDPOINTS=172.16.1.2:2379,172.16.1.6:2379,172.16.1.7:2379</span></span><br><span class="line"><span class="emphasis"></span></span><br><span class="line"><span class="emphasis">root@k8s-master:~# etcdctl  --endpoints=$ENDPOINTS --write-out=table member list</span></span><br><span class="line"><span class="emphasis">+------------------+---------+----------+------------------------+------------------------+</span></span><br><span class="line"><span class="emphasis">|        ID        | STATUS  |   NAME   |       PEER ADDRS       |      CLIENT ADDRS      |</span></span><br><span class="line"><span class="emphasis">+------------------+---------+----------+------------------------+------------------------+</span></span><br><span class="line"><span class="emphasis">|  81555da054c53f2 | started | etcd_</span>one | http://172.16.1.2:2380 | http://172.16.1.2:2379 |</span><br><span class="line">| d26140195b4d1493 | started | etcd<span class="emphasis">_two | http://172.16.1.6:2380 | http://172.16.1.6:2379 |</span></span><br><span class="line"><span class="emphasis">| ffd1352eadf95c93 | started | etcd_</span>two | http://172.16.1.7:2380 | http://172.16.1.7:2379 |</span><br><span class="line"><span class="code">+------------------+</span>---------<span class="code">+----------+</span>------------------------<span class="code">+------------------------+</span></span><br></pre></td></tr></table></figure>
+<h3 id="启动参数说明"><a href="#启动参数说明" class="headerlink" title="启动参数说明"></a>启动参数说明</h3><ul>
+<li>-name  </li>
+</ul>
+<figure class="highlight haskell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">环境变量为： <span class="type">ETCD_NAME</span> </span><br><span class="line">成员的可读名称，默认是<span class="keyword">default</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>-data-dir </li>
+</ul>
+<figure class="highlight autohotkey"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">环境变量为： ETCD_DAT<span class="built_in">A_DIR</span> </span><br><span class="line">数据目录，默认是<span class="string">"$&#123;name&#125;.etcd"</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>-wal-dir                     </li>
+</ul>
+<figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">环境变量为： ETCD_WAL_DIR<span class="string">| </span></span><br><span class="line">专用wal目录的路径。 如果这个标志被设置，</span><br><span class="line">etcd会将WAL文件写入walDir而不是dataDir。 这允许使用专用磁盘，并有助于避免记录和其他IO操作之间的竞争。默认是空</span><br></pre></td></tr></table></figure>
+<ul>
+<li>–snapshot-count       </li>
+</ul>
+<figure class="highlight lsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">环境变量为： ETCD_SNAPSHOT_COUNT </span><br><span class="line">触发快照到磁盘的已提交事务的数量。默认是<span class="number">10000</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>–heartbeat-interval </li>
+</ul>
+<figure class="highlight lsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">环境变量为：ETCD_HEARTBEAT_INTERVAL</span><br><span class="line">心跳间隔的时间（以毫秒为单位）默认是<span class="number">100</span>ms</span><br></pre></td></tr></table></figure>
+<ul>
+<li>–election-timeout            </li>
+</ul>
+<figure class="highlight lsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">环境变量为：ETCD_ELECTION_TIMEOUT</span><br><span class="line">选举超时的时间（以毫秒为单位）默认是<span class="number">1000</span>ms</span><br></pre></td></tr></table></figure>
+<ul>
+<li>–listen-peer-urls           </li>
+</ul>
+<figure class="highlight livecodeserver"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">环境变量为：ETCD_LISTEN_PEER_URLS</span><br><span class="line">监听对等流量的<span class="built_in">URL</span>列表。 这个标志告诉etcd在指定的scheme://IP:port 组合上接受来自其对端的传入请求。 Scheme可以是<span class="keyword">http</span>或<span class="keyword">https</span>。如果指定IP为<span class="number">0.0</span><span class="number">.0</span><span class="number">.0</span>，则etcd监听所有接口上的给定端口。 如果IP地址和端口一样，etcd将监听给定的端口和接口。 可以使用多个<span class="built_in">URL</span>来指定要监听的地址和端口的数量。 etcd将响应来自任何列出的地址和端口的请求。默认是<span class="keyword">http</span>://localhost:<span class="number">2380</span> |</span><br></pre></td></tr></table></figure>
+<ul>
+<li>–listen-client-urls          </li>
+</ul>
+<figure class="highlight x86asm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">环境变量为：ETCD_LISTEN_CLIENT_URLS</span><br><span class="line">要监听客户端流量的URL列表。 该标志告诉etcd接受来自指定方案的客户端的传入请求：scheme//<span class="built_in">IP</span>:port。 Scheme可以是http或https。 如果指定<span class="built_in">IP</span>为<span class="number">0.0</span><span class="meta">.0</span><span class="meta">.0</span>，则etcd监听所有接口上的给定端口。 如果<span class="built_in">IP</span>地址和端口一样，etcd将监听给定的端口和接口。 可以使用多个URL来指定要监听的地址和端口的数量。 etcd将响应来自任何列出的地址和端口的请求。默认是http://localhost:<span class="number">2379</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>–max-snapshots               </li>
+</ul>
+<figure class="highlight lsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">环境变量为：ETCD_MAX_SNAPSHOTS</span><br><span class="line">保留的最大快照文件数量（<span class="number">0</span>无限制）默认是<span class="number">5</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>–max-wals     </li>
+</ul>
+<figure class="highlight lsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">环境变量为：ETCD_MAX_WALS</span><br><span class="line">要保留的最大wal文件数（<span class="number">0</span>是无限的）默认是<span class="number">5</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>–cors                        </li>
+</ul>
+<figure class="highlight fortran"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">环境变量为： ETCD_CORS  </span><br><span class="line">用逗号分隔的CORS起源白名单（跨源资源共享）。默认是<span class="keyword">none</span></span><br></pre></td></tr></table></figure>
+<p>–initial-advertise-peer-urls </p>
+<figure class="highlight livecodeserver"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">环境变量为： ETCD_INITIAL_ADVERTISE_PEER_URLS </span><br><span class="line">此成员的对等<span class="built_in">URL</span>列表以通告给群集的其余部分。 这些地址用于在集群周围传送etcd数据。 至少有一个必须可路由到所有集群成员。 这些<span class="built_in">URL</span>可以包含域名。默认是<span class="keyword">http</span>://localhost:<span class="number">2380</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>–initial-cluster            </li>
+</ul>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">环境变量为： ETCD_INITIAL_CLUSTER </span><br><span class="line">引导的初始群集配置。默认是<span class="keyword">default</span>=<span class="string">http:</span><span class="comment">//localhost:2380</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>–initial-cluster-state</li>
+</ul>
+<figure class="highlight haxe"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">环境变量为： ETCD_INITIAL_CLUSTER_STATE </span><br><span class="line">初始群集状态（“<span class="keyword">new</span><span class="type"></span>”或“existing”）。 在初始静态或DNS引导过程中为所有成员设置为<span class="keyword">new</span><span class="type"></span>。 如果此选项设置为existing，etcd将尝试加入现有的集群。 如果设置了错误的值，etcd将尝试启动，但安全失败。默认是<span class="keyword">new</span><span class="type"></span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>–initial-cluster-token       </li>
+</ul>
+<figure class="highlight mel"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">环境变量为：TCD_INITIAL_CLUSTER_TOKEN </span><br><span class="line">在引导期间，etcd集群的初始集群令牌。默认是etcd-<span class="keyword">cluster</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>–advertise-client-urls      </li>
+</ul>
+<figure class="highlight livecodeserver"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">环境变量为：ETCD_ADVERTISE_CLIENT_URLS </span><br><span class="line">此成员的客户端<span class="built_in">URL</span>列表，以通告给群集的其余部分。 这些<span class="built_in">URL</span>可以包含域名，默认是<span class="keyword">http</span>://localhost:<span class="number">2379</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>–discovery  </li>
+</ul>
+<figure class="highlight livecodeserver"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">环境变量为：ETCD_DISCOVERY </span><br><span class="line">用于引导群集的发现<span class="built_in">URL</span>。默认是<span class="literal">none</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>–discovery-srv  </li>
+</ul>
+<figure class="highlight fortran"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">环境变量为：ETCD_DISCOVERY_SRV</span><br><span class="line">用于引导群集的DNS srv域。默认是<span class="keyword">none</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>–discovery-fallback </li>
+</ul>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">环境变量为： ETCD_DISCOVERY_FALLBACK</span><br><span class="line">发现服务失败时的预期行为（“<span class="keyword">exit</span>”或“proxy”）。 <span class="string">"proxy"</span>仅支持v2 API。默认是proxy</span><br></pre></td></tr></table></figure>
+<ul>
+<li>–discovery-proxy </li>
+</ul>
+<figure class="highlight fortran"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">环境变量为：ETCD_DISCOVERY_PROXY </span><br><span class="line">用于流量发现服务的HTTP代理。默认是<span class="keyword">none</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>–strict-reconfig-check</li>
+</ul>
+<figure class="highlight actionscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">环境变量为：ETCD_STRICT_RECONFIG_CHECK</span><br><span class="line">拒绝会导致法定人数丢失的重新配置请求。默认是<span class="literal">false</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>–enable-v2   </li>
+</ul>
+<figure class="highlight actionscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">环境变量为：ETCD_ENABLE_V2 </span><br><span class="line">接受etcd V2客户端的请求，默认是<span class="literal">true</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>–auto-compaction-retention</li>
+</ul>
+<figure class="highlight lsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">环境变量为： ETCD_AUTO_COMPACTION_RETENTION </span><br><span class="line">自动压缩保留mvcc键值存储在小时内。 <span class="number">0</span>意味着禁用自动压缩。默认是<span class="number">0</span></span><br></pre></td></tr></table></figure>
+<h3 id="etcd使用"><a href="#etcd使用" class="headerlink" title="etcd使用"></a>etcd使用</h3><p>用户主要通过putting 或getting key来与etcd进行交互。 本节介绍如何通过使用etcdctl（一个用于与etcd服务器交互的命令行工具）来完成此操作。 这里描述的概念应该适用于gRPC API或客户端库API。</p>
+<p>默认情况下，etcdctl会与v2 API与etcd服务器通信以实现向后兼容。 对于etcdctl使用v3 API与etcd对话，API版本必须通过ETCDCTL_API环境变量设置为版本3。</p>
+<ul>
+<li>查看版本</li>
+</ul>
+<figure class="highlight crmsh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">root@k8s-<span class="literal">master</span>:~<span class="comment"># etcdctl version</span></span><br><span class="line">etcdctl <span class="keyword">version</span>: <span class="number">3.2</span>.<span class="number">11</span></span><br><span class="line">API <span class="keyword">version</span>: <span class="number">3.2</span></span><br><span class="line">root@k8s-<span class="literal">master</span>:~<span class="comment"># etcd -version</span></span><br><span class="line">etcd <span class="keyword">Version</span>: <span class="number">3.2</span>.<span class="number">11</span></span><br><span class="line">Git SHA: <span class="number">1</span>e1dbb2</span><br><span class="line">Go <span class="keyword">Version</span>: go1.<span class="number">8.5</span></span><br><span class="line">Go OS/Arch: linux/amd64</span><br></pre></td></tr></table></figure>
+<ul>
+<li>写入key<br>应用程序通过写入key、value存储到etcd集群中。 每个存储的key通过Raft协议复制到所有etcd集群成员，以实现一致性和可靠性。</li>
+</ul>
+<figure class="highlight autoit"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">root<span class="symbol">@k8s</span>-master:~<span class="meta"># etcdctl  --endpoints=$ENDPOINTS put foo bar</span></span><br><span class="line">OK</span><br></pre></td></tr></table></figure>
+<ul>
+<li>读取key</li>
+</ul>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">root@k8s-master:~# etcdctl  <span class="attribute">--endpoints</span>=<span class="variable">$ENDPOINTS</span> <span class="builtin-name">get</span>  foo</span><br><span class="line">foo</span><br><span class="line">bar</span><br></pre></td></tr></table></figure>
+<figure class="highlight llvm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">root<span class="title">@k8s-master</span>:~# etcdctl  --endpoints=$ENDPOINTS get  foo  --hex #格式化为<span class="number">16</span>进制</span><br><span class="line">\<span class="keyword">x</span><span class="number">66</span>\<span class="keyword">x</span><span class="number">6</span>f\<span class="keyword">x</span><span class="number">6</span>f</span><br><span class="line">\<span class="keyword">x</span><span class="number">62</span>\<span class="keyword">x</span><span class="number">61</span>\<span class="keyword">x</span><span class="number">72</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight fortran"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">root@k8s-master:~# etcdctl  --endpoints=$ENDPOINTS get  foo  --<span class="built_in">print</span>-<span class="keyword">value</span>-<span class="keyword">only</span> #只显示<span class="keyword">value</span></span><br><span class="line">bar</span><br></pre></td></tr></table></figure>
+<ul>
+<li>删除key</li>
+</ul>
+<figure class="highlight autoit"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">root<span class="symbol">@k8s</span>-master:~<span class="meta"># etcdctl  --endpoints=$ENDPOINTS del  foo</span></span><br><span class="line"><span class="number">1</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight q"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">root@k8s-master:~# etcdctl  --endpoints=$ENDPOINTS del --<span class="built_in">prev</span>-kv  foo #删除并显示<span class="built_in">key</span>、<span class="built_in">value</span></span><br><span class="line"><span class="number">1</span></span><br><span class="line">foo</span><br><span class="line">bar</span><br></pre></td></tr></table></figure>
+<ul>
+<li>实时监控key的变化</li>
+</ul>
+<figure class="highlight gams"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">root@k8s-master:~# etcdctl  --endpoints=<span class="symbol">$</span>ENDPOINTS watch  foo #在另外窗口执行了<span class="keyword">put</span>操作</span><br><span class="line"><span class="keyword">PUT</span></span><br><span class="line">foo</span><br><span class="line">bar</span><br></pre></td></tr></table></figure>
+<p>以上是一一些简单的使用，详细请参考官方文档：</p>
+<p><a href="https://coreos.com/etcd/docs/latest/dev-guide/interacting_v3.html" target="_blank" rel="noopener">https://coreos.com/etcd/docs/latest/dev-guide/interacting_v3.html</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/etcd/" rel="tag"># etcd</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/12/21/docker容器网络三之vxlan/" rel="next" title="docker容器网络三之vxlan">
+                <i class="fa fa-chevron-left"></i> docker容器网络三之vxlan
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/12/28/Kubernetes集群部署之flannel/" rel="prev" title="Kubernetes集群部署之flannel">
+                Kubernetes集群部署之flannel <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.gif"
+                alt="devil" />
+            
+              <p class="site-author-name" itemprop="name">devil</p>
+              <p class="site-description motion-element" itemprop="description">Good Good Study！Day Day Up！</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">27</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">18</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/rss2.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/hanjh310" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#总体介绍"><span class="nav-number">1.</span> <span class="nav-text">总体介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#etcd介绍"><span class="nav-number">2.</span> <span class="nav-text">etcd介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#环境介绍"><span class="nav-number">3.</span> <span class="nav-text">环境介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#etcd安装"><span class="nav-number">4.</span> <span class="nav-text">etcd安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#启动etcd集群"><span class="nav-number">5.</span> <span class="nav-text">启动etcd集群</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#启动参数说明"><span class="nav-number">6.</span> <span class="nav-text">启动参数说明</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#etcd使用"><span class="nav-number">7.</span> <span class="nav-text">etcd使用</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">devil</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.3</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://https-blog-loveops-org.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://blog.loveops.com/2017/12/25/Kubernetes集群部署之etcd/';
+          this.page.identifier = '2017/12/25/Kubernetes集群部署之etcd/';
+          this.page.title = 'Kubernetes集群部署之etcd';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://https-blog-loveops-org.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

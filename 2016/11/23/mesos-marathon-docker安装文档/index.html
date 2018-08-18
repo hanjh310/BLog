@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="docker mesos," />
+
+
+
+
+
+  <link rel="alternate" href="/rss2.xml" title="LoveOps" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="系统环境ubuntu14.04 LTS 角色分配   IP地址 主机名 角色     192.168.9.100 mesos-master01 mesos-master,marathon,consul,es   192.168.9.101 mesos-master02 mesos-master,marathon,con">
+<meta name="keywords" content="docker mesos">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mesos+marathon+docker安装文档">
+<meta property="og:url" content="http://blog.loveops.com/2016/11/23/mesos-marathon-docker安装文档/index.html">
+<meta property="og:site_name" content="LoveOps">
+<meta property="og:description" content="系统环境ubuntu14.04 LTS 角色分配   IP地址 主机名 角色     192.168.9.100 mesos-master01 mesos-master,marathon,consul,es   192.168.9.101 mesos-master02 mesos-master,marathon,consul,es   192.168.9.102 mesos-master03 me">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-12-01T14:08:21.206Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="mesos+marathon+docker安装文档">
+<meta name="twitter:description" content="系统环境ubuntu14.04 LTS 角色分配   IP地址 主机名 角色     192.168.9.100 mesos-master01 mesos-master,marathon,consul,es   192.168.9.101 mesos-master02 mesos-master,marathon,consul,es   192.168.9.102 mesos-master03 me">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://blog.loveops.com/2016/11/23/mesos-marathon-docker安装文档/"/>
+
+
+
+
+
+  <title>mesos+marathon+docker安装文档 | LoveOps</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">LoveOps</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Devil'Blog</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.loveops.com/2016/11/23/mesos-marathon-docker安装文档/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="devil">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LoveOps">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">mesos+marathon+docker安装文档</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-11-23T21:44:14+08:00">
+                2016-11-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/docker/" itemprop="url" rel="index">
+                    <span itemprop="name">docker</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2016/11/23/mesos-marathon-docker安装文档/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2016/11/23/mesos-marathon-docker安装文档/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  753
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  4
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h4 id="系统环境"><a href="#系统环境" class="headerlink" title="系统环境"></a>系统环境</h4><p>ubuntu14.04 LTS</p>
+<h4 id="角色分配"><a href="#角色分配" class="headerlink" title="角色分配"></a>角色分配</h4><table>
+<thead>
+<tr>
+<th>IP地址</th>
+<th>主机名</th>
+<th>角色</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>192.168.9.100</td>
+<td>mesos-master01</td>
+<td>mesos-master,marathon,consul,es</td>
+</tr>
+<tr>
+<td>192.168.9.101</td>
+<td>mesos-master02</td>
+<td>mesos-master,marathon,consul,es</td>
+</tr>
+<tr>
+<td>192.168.9.102</td>
+<td>mesos-master03</td>
+<td>mesos-master,marathon,consul,es</td>
+</tr>
+<tr>
+<td>192.168.9.104</td>
+<td>mesos-slave01</td>
+<td>mesos-slave,consul-client,registrator</td>
+</tr>
+<tr>
+<td>192.168.9.105</td>
+<td>mesos-slave02</td>
+<td>mesos-slave,consul-client,registrator</td>
+</tr>
+<tr>
+<td>192.168.9.106</td>
+<td>mesos-slave03</td>
+<td>mesos-slave,consul-client,registrator</td>
+</tr>
+<tr>
+<td>192.168.9.107</td>
+<td>mesos-slave04</td>
+<td>mesos-slave,consul-client,registrator</td>
+</tr>
+</tbody>
+</table>
+<h4 id="环境准备："><a href="#环境准备：" class="headerlink" title="环境准备："></a>环境准备：</h4><p>以下操作在所有主机：</p>
+<h4 id="设置时区"><a href="#设置时区" class="headerlink" title="设置时区"></a>设置时区</h4><p>设置为亚洲上海</p>
+<figure class="highlight ebnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">dpkg-reconfigure tzdata</span></span><br></pre></td></tr></table></figure>
+<p>设置时间同步，写入计划任务</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">*<span class="regexp">/20 * * * * /u</span>sr<span class="regexp">/sbin/</span>ntpdate pool.ntp.org &gt; <span class="regexp">/dev/</span><span class="keyword">null</span> <span class="number">2</span>&gt;&amp;<span class="number">1</span></span><br></pre></td></tr></table></figure>
+<h4 id="设置主机名，添加hosts"><a href="#设置主机名，添加hosts" class="headerlink" title="设置主机名，添加hosts"></a>设置主机名，添加hosts</h4><figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">192<span class="selector-class">.168</span><span class="selector-class">.9</span><span class="selector-class">.100</span>  <span class="selector-tag">mesos-master01</span>  </span><br><span class="line">192<span class="selector-class">.168</span><span class="selector-class">.9</span><span class="selector-class">.101</span>  <span class="selector-tag">mesos-master02</span>  </span><br><span class="line">192<span class="selector-class">.168</span><span class="selector-class">.9</span><span class="selector-class">.102</span>  <span class="selector-tag">mesos-master03</span>  </span><br><span class="line">192<span class="selector-class">.168</span><span class="selector-class">.9</span><span class="selector-class">.104</span>  <span class="selector-tag">mesos-slave01</span>   </span><br><span class="line">192<span class="selector-class">.168</span><span class="selector-class">.9</span><span class="selector-class">.105</span>  <span class="selector-tag">mesos-slave02</span>   </span><br><span class="line">192<span class="selector-class">.168</span><span class="selector-class">.9</span><span class="selector-class">.106</span>  <span class="selector-tag">mesos-slave03</span>   </span><br><span class="line">192<span class="selector-class">.168</span><span class="selector-class">.9</span><span class="selector-class">.107</span>  <span class="selector-tag">mesos-slave04</span></span><br></pre></td></tr></table></figure>
+<h4 id="安装docker"><a href="#安装docker" class="headerlink" title="安装docker"></a>安装docker</h4><figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -sSL http<span class="variable">s:</span>//<span class="built_in">get</span>.daocloud.io/docker | <span class="keyword">sh</span></span><br></pre></td></tr></table></figure>
+<h4 id="添加mesos源"><a href="#添加mesos源" class="headerlink" title="添加mesos源"></a>添加mesos源</h4><figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-key adv --keyserver keyserver.ubuntu.<span class="keyword">com</span> --recv E56151BF</span><br><span class="line">DISTRO=$(lsb_release -<span class="keyword">is</span> | <span class="keyword">tr</span> <span class="string">'[:upper:]'</span> <span class="string">'[:lower:]'</span>)</span><br><span class="line">CODENAME=$(lsb_release -<span class="keyword">cs</span>)</span><br><span class="line"><span class="keyword">echo</span> <span class="string">"deb http://repos.mesosphere.io/$&#123;DISTRO&#125; $&#123;CODENAME&#125; main"</span> | sudo tee /etc/apt/sources.<span class="keyword">list</span>.d/mesosphere.<span class="keyword">list</span></span><br></pre></td></tr></table></figure>
+<h4 id="更新apt源"><a href="#更新apt源" class="headerlink" title="更新apt源"></a>更新apt源</h4><figure class="highlight q"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-<span class="built_in">get</span> <span class="keyword">update</span></span><br></pre></td></tr></table></figure>
+<h4 id="安装mesos"><a href="#安装mesos" class="headerlink" title="安装mesos"></a>安装mesos</h4><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-<span class="builtin-name">get</span> install mesos</span><br></pre></td></tr></table></figure>
+<p>配置文件一般为：</p>
+<ul>
+<li>全局配置文件目录：/etc/mesos</li>
+<li>master配置文件目录：/etc/mesos-master</li>
+<li>slave配置文件目录：/etc/mesos-slave</li>
+</ul>
+<p>为了使master正常工作，有三个必须配置的变量：</p>
+<ul>
+<li>ZooKeeper URL（zk）</li>
+<li>quorum</li>
+<li>work_dir</li>
+</ul>
+<p>如需添加其他配置可以相应目录下创建相应文件夹<br>比如：cluster   内容写集群名字，<br>leader如果不跳转 需要在此目录配置 hostname</p>
+<h4 id="配置mesos-master"><a href="#配置mesos-master" class="headerlink" title="配置mesos-master"></a>配置mesos-master</h4><p>以下只需要在9.100-102三台设置即可，ip地址修改为相应的ip地址</p>
+<p>这里使用线上的zk集群<br><figure class="highlight dns"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">echo "zk://<span class="number">192.168.9.21</span>:<span class="number">2181,192.168</span>.<span class="number">9.22:2181</span>,<span class="number">192.168.9.25</span>:<span class="number">2181</span>/mesos" &gt; /etc/mesos/zk</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight jboss-cli"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">echo</span> <span class="string">"192.168.9.101"</span> &gt; <span class="string">/etc/mesos-master/hostname</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight jboss-cli"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">echo</span> <span class="string">"prod"</span> &gt; <span class="string">/etc/mesos-master/cluster</span></span><br></pre></td></tr></table></figure>
+<h4 id="启动mesos-master"><a href="#启动mesos-master" class="headerlink" title="启动mesos-master"></a>启动mesos-master</h4><figure class="highlight crmsh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">service mesos-<span class="keyword">master</span> <span class="title">start</span></span><br></pre></td></tr></table></figure>
+<h4 id="配置mesos-slave"><a href="#配置mesos-slave" class="headerlink" title="配置mesos-slave"></a>配置mesos-slave</h4><figure class="highlight dns"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">echo "zk://<span class="number">192.168.9.21</span>:<span class="number">2181,192.168</span>.<span class="number">9.22:2181</span>,<span class="number">192.168.9.25</span>:<span class="number">2181</span>/mesos" &gt; /etc/mesos/zk</span><br></pre></td></tr></table></figure>
+<h4 id="配置memsos-slave支持docker"><a href="#配置memsos-slave支持docker" class="headerlink" title="配置memsos-slave支持docker"></a>配置memsos-slave支持docker</h4><figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">echo <span class="string">'docker,mesos'</span> &gt; <span class="regexp">/etc/m</span>esos-slave<span class="regexp">/containerizers</span></span><br></pre></td></tr></table></figure>
+<h4 id="增加执行器超时时间，为了拉取镜像的时间"><a href="#增加执行器超时时间，为了拉取镜像的时间" class="headerlink" title="增加执行器超时时间，为了拉取镜像的时间"></a>增加执行器超时时间，为了拉取镜像的时间</h4><figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">echo <span class="string">'10mins'</span> &gt; <span class="regexp">/etc/m</span>esos-slave<span class="regexp">/executor_registration_timeout</span></span><br></pre></td></tr></table></figure>
+<h4 id="安装marathon"><a href="#安装marathon" class="headerlink" title="安装marathon"></a>安装marathon</h4><p>marathon新版本需要java1.8支持，先安装java</p>
+<p>添加ppa安装java</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">add</span>-apt-repository <span class="keyword">pp</span><span class="variable">a:webupd8team</span>/java</span><br><span class="line">apt-<span class="built_in">get</span> <span class="keyword">update</span></span><br><span class="line">apt-<span class="built_in">get</span> install oracle-java8-installer</span><br></pre></td></tr></table></figure>
+<p>设置java1.8位默认java环境</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt-get <span class="keyword">install</span> <span class="keyword">oracle</span>-java8-<span class="keyword">set</span>-<span class="keyword">default</span></span><br></pre></td></tr></table></figure>
+<p>安装marathon</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt-<span class="builtin-name">get</span> install marathon</span><br></pre></td></tr></table></figure>
+<p>启动marathon</p>
+<figure class="highlight armasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">service</span> <span class="keyword">marathon </span>start</span><br></pre></td></tr></table></figure>
+<h4 id="安装consul"><a href="#安装consul" class="headerlink" title="安装consul"></a>安装consul</h4><p>下载consul二进制文件</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget https:<span class="regexp">//</span>releases.hashicorp.com<span class="regexp">/consul/</span><span class="number">0.7</span>.<span class="number">2</span><span class="regexp">/consul_0.7.2_linux_amd64.zip</span></span><br></pre></td></tr></table></figure>
+<p>解压文件，然后分发到每台机器上。</p>
+<p>9.100-9.102 三台服务器启动server角色</p>
+<figure class="highlight lsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">consul agent -server -bootstrap-expect <span class="number">3</span> -data-dir /data/consul  -dc=prod -bind=<span class="number">0.0</span><span class="number">.0</span><span class="number">.0</span> -client=<span class="number">0.0</span><span class="number">.0</span><span class="number">.0</span> -advertise=<span class="number">192.168</span><span class="number">.9</span><span class="number">.100</span> -ui</span><br></pre></td></tr></table></figure>
+<p>192.104-9.107 4台服务器上启动client角色</p>
+<figure class="highlight lsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">consul agent -data-dir /data/consul -bind=<span class="number">0.0</span><span class="number">.0</span><span class="number">.0</span> -client=<span class="number">0.0</span><span class="number">.0</span><span class="number">.0</span> -dc=<span class="number">51</span>idc-prod -advertise=<span class="number">192.168</span><span class="number">.9</span><span class="number">.104</span> -join <span class="number">192.168</span><span class="number">.9</span><span class="number">.100</span></span><br></pre></td></tr></table></figure>
+<h4 id="启动registrator-容器"><a href="#启动registrator-容器" class="headerlink" title="启动registrator 容器"></a>启动registrator 容器</h4><figure class="highlight jboss-cli"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d  -it <span class="params">--name</span> registrator <span class="params">--restart</span> always <span class="params">--volume</span> <span class="string">/var/run/docker.sock</span>:<span class="string">/tmp/docker.sock</span> gliderlabs/registrator -resync 60 -ip 192.168.9.105 consul:<span class="string">//192.168.9.105</span><span class="function">:8500</span></span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/docker-mesos/" rel="tag"># docker mesos</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/10/07/Rsyslog-v8学习笔记七-RainerScript/" rel="next" title="Rsyslog-v8学习笔记七(RainerScript)">
+                <i class="fa fa-chevron-left"></i> Rsyslog-v8学习笔记七(RainerScript)
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/11/25/ES索引设置/" rel="prev" title="ES索引设置">
+                ES索引设置 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.gif"
+                alt="devil" />
+            
+              <p class="site-author-name" itemprop="name">devil</p>
+              <p class="site-description motion-element" itemprop="description">Good Good Study！Day Day Up！</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">27</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">18</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/rss2.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/hanjh310" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#系统环境"><span class="nav-number">1.</span> <span class="nav-text">系统环境</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#角色分配"><span class="nav-number">2.</span> <span class="nav-text">角色分配</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#环境准备："><span class="nav-number">3.</span> <span class="nav-text">环境准备：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#设置时区"><span class="nav-number">4.</span> <span class="nav-text">设置时区</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#设置主机名，添加hosts"><span class="nav-number">5.</span> <span class="nav-text">设置主机名，添加hosts</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#安装docker"><span class="nav-number">6.</span> <span class="nav-text">安装docker</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#添加mesos源"><span class="nav-number">7.</span> <span class="nav-text">添加mesos源</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#更新apt源"><span class="nav-number">8.</span> <span class="nav-text">更新apt源</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#安装mesos"><span class="nav-number">9.</span> <span class="nav-text">安装mesos</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#配置mesos-master"><span class="nav-number">10.</span> <span class="nav-text">配置mesos-master</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#启动mesos-master"><span class="nav-number">11.</span> <span class="nav-text">启动mesos-master</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#配置mesos-slave"><span class="nav-number">12.</span> <span class="nav-text">配置mesos-slave</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#配置memsos-slave支持docker"><span class="nav-number">13.</span> <span class="nav-text">配置memsos-slave支持docker</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#增加执行器超时时间，为了拉取镜像的时间"><span class="nav-number">14.</span> <span class="nav-text">增加执行器超时时间，为了拉取镜像的时间</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#安装marathon"><span class="nav-number">15.</span> <span class="nav-text">安装marathon</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#安装consul"><span class="nav-number">16.</span> <span class="nav-text">安装consul</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#启动registrator-容器"><span class="nav-number">17.</span> <span class="nav-text">启动registrator 容器</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">devil</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.3</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://https-blog-loveops-org.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://blog.loveops.com/2016/11/23/mesos-marathon-docker安装文档/';
+          this.page.identifier = '2016/11/23/mesos-marathon-docker安装文档/';
+          this.page.title = 'mesos+marathon+docker安装文档';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://https-blog-loveops-org.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

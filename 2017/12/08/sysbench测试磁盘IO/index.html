@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="sysbench," />
+
+
+
+
+
+  <link rel="alternate" href="/rss2.xml" title="LoveOps" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="前面已经介绍了sysbench的参数，本文介绍使用sysbench测试磁盘io环境介绍： 系统：ubuntu16.04 （青云虚拟机） 内存：16G cpu : 8核心 sysbench版本：1.0.10  fileio的基本参数：1234567891011121314151617$ sysbench fileio h">
+<meta name="keywords" content="sysbench">
+<meta property="og:type" content="article">
+<meta property="og:title" content="sysbench测试磁盘IO">
+<meta property="og:url" content="http://blog.loveops.com/2017/12/08/sysbench测试磁盘IO/index.html">
+<meta property="og:site_name" content="LoveOps">
+<meta property="og:description" content="前面已经介绍了sysbench的参数，本文介绍使用sysbench测试磁盘io环境介绍： 系统：ubuntu16.04 （青云虚拟机） 内存：16G cpu : 8核心 sysbench版本：1.0.10  fileio的基本参数：1234567891011121314151617$ sysbench fileio helpsysbench 1.0.10 (using bundled LuaJIT">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-12-08T15:21:41.996Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="sysbench测试磁盘IO">
+<meta name="twitter:description" content="前面已经介绍了sysbench的参数，本文介绍使用sysbench测试磁盘io环境介绍： 系统：ubuntu16.04 （青云虚拟机） 内存：16G cpu : 8核心 sysbench版本：1.0.10  fileio的基本参数：1234567891011121314151617$ sysbench fileio helpsysbench 1.0.10 (using bundled LuaJIT">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://blog.loveops.com/2017/12/08/sysbench测试磁盘IO/"/>
+
+
+
+
+
+  <title>sysbench测试磁盘IO | LoveOps</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">LoveOps</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Devil'Blog</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.loveops.com/2017/12/08/sysbench测试磁盘IO/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="devil">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LoveOps">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">sysbench测试磁盘IO</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-08T22:53:39+08:00">
+                2017-12-08
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/linux/" itemprop="url" rel="index">
+                    <span itemprop="name">linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/12/08/sysbench测试磁盘IO/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2017/12/08/sysbench测试磁盘IO/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  1,408
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  8
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="前面已经介绍了sysbench的参数，本文介绍使用sysbench测试磁盘io"><a href="#前面已经介绍了sysbench的参数，本文介绍使用sysbench测试磁盘io" class="headerlink" title="前面已经介绍了sysbench的参数，本文介绍使用sysbench测试磁盘io"></a>前面已经介绍了sysbench的参数，本文介绍使用sysbench测试磁盘io</h3><h4 id="环境介绍："><a href="#环境介绍：" class="headerlink" title="环境介绍："></a>环境介绍：</h4><ul>
+<li>系统：ubuntu16.04 （青云虚拟机）</li>
+<li>内存：16G</li>
+<li>cpu : 8核心</li>
+<li>sysbench版本：1.0.10</li>
+</ul>
+<h4 id="fileio的基本参数："><a href="#fileio的基本参数：" class="headerlink" title="fileio的基本参数："></a>fileio的基本参数：</h4><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">$ sysbench fileio help</span><br><span class="line">sysbench 1.0.10 (using bundled LuaJIT 2.1.0-beta2)</span><br><span class="line"></span><br><span class="line">fileio options:</span><br><span class="line">  <span class="attribute">--file-num</span>=N              创建文件数量，默认 [128]</span><br><span class="line">  <span class="attribute">--file-block-size</span>=N       测试使用块儿大小，默认 [16384]</span><br><span class="line">  <span class="attribute">--file-total-size</span>=SIZE    测试使用文件总大小，默认 [2G]</span><br><span class="line">  <span class="attribute">--file-test-mode</span>=STRING   测试模式 &#123;seqwr（顺序写））, seqrewr（顺序读写）, seqrd（顺序读）, rndrd（随机读）, rndwr（随机写）, rndrw(随机读写)&#125;</span><br><span class="line">  <span class="attribute">--file-io-mode</span>=STRING     文件操操纵模式 &#123;sync（同步）,async（异步）,mmap（快速map映射））&#125;默认 [sync]</span><br><span class="line">  <span class="attribute">--file-async-backlog</span>=N    number of asynchronous operatons <span class="keyword">to</span><span class="built_in"> queue </span>per thread [128]</span><br><span class="line">  <span class="attribute">--file-extra-flags</span>=STRING 使用额外的标志符来打开文件 &#123;sync,dsync,direct&#125; []</span><br><span class="line">  <span class="attribute">--file-fsync-freq</span>=N       在完成N次请求之后，执行fsync()，0表示不使用fsync，默认值：100。</span><br><span class="line">  --file-fsync-all[=on|off] 每次写操作后执行fsync()，默认值：off</span><br><span class="line">  --file-fsync-end[=on|off] 测试结束后执行fsync()，默认值：on。</span><br><span class="line">  <span class="attribute">--file-fsync-mode</span>=STRING  使用fsync或fdatasync方法进行同步，默认值：fsync。</span><br><span class="line">  <span class="attribute">--file-merged-requests</span>=N  m尽可能的合并N个IO请求数，0表示不合并，默认值：0。</span><br><span class="line">  <span class="attribute">--file-rw-ratio</span>=N         测试时候的读写比例，默认值：1.5(即3:2)。</span><br></pre></td></tr></table></figure>
+<h4 id="测试分为三个阶段"><a href="#测试分为三个阶段" class="headerlink" title="测试分为三个阶段"></a>测试分为三个阶段</h4><ul>
+<li>准备（prepare),为测试准备数据</li>
+</ul>
+<figure class="highlight gams"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">$</span> sysbench  fileio --<span class="keyword">file</span>-total-size=<span class="number">8</span>G --<span class="keyword">file</span>-num=<span class="number">8</span> prepare</span><br><span class="line">sysbench <span class="number">1.0</span><span class="number">.10</span> (<span class="keyword">using</span> bundled LuaJIT <span class="number">2.1</span><span class="number">.0</span>-beta2)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="title">Removing</span></span> test <span class="keyword">files</span>...</span><br><span class="line">root@i-byqycf1n:/fileios# sysbench  fileio --<span class="keyword">file</span>-total-size=<span class="number">8</span>G --<span class="keyword">file</span>-num=<span class="number">8</span> prepare</span><br><span class="line">sysbench <span class="number">1.0</span><span class="number">.10</span> (<span class="keyword">using</span> bundled LuaJIT <span class="number">2.1</span><span class="number">.0</span>-beta2)</span><br><span class="line"></span><br><span class="line"><span class="number">8</span> <span class="keyword">files</span>, <span class="number">1048576</span>Kb each, <span class="number">8192</span>Mb total</span><br><span class="line"><span class="function"><span class="title">Creating</span></span> <span class="keyword">files</span> <span class="keyword">for</span> the test...</span><br><span class="line">Extra <span class="keyword">file</span> open flags: <span class="number">0</span></span><br><span class="line">Creating <span class="keyword">file</span> test_file<span class="number">.0</span></span><br><span class="line">Creating <span class="keyword">file</span> test_file<span class="number">.1</span></span><br><span class="line">Creating <span class="keyword">file</span> test_file<span class="number">.2</span></span><br><span class="line">Creating <span class="keyword">file</span> test_file<span class="number">.3</span></span><br><span class="line">Creating <span class="keyword">file</span> test_file<span class="number">.4</span></span><br><span class="line">Creating <span class="keyword">file</span> test_file<span class="number">.5</span></span><br><span class="line">Creating <span class="keyword">file</span> test_file<span class="number">.6</span></span><br><span class="line">Creating <span class="keyword">file</span> test_file<span class="number">.7</span></span><br><span class="line"><span class="number">8589934592</span> bytes written in <span class="number">77.55</span> seconds (<span class="number">105.63</span> MiB/sec).</span><br></pre></td></tr></table></figure>
+<ul>
+<li>测试（run）</li>
+</ul>
+<blockquote>
+<ol>
+<li>随机读写</li>
+</ol>
+</blockquote>
+<figure class="highlight livecodeserver"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">$ sysbench fileio <span class="comment">--file-total-size=8G --file-num=8 --file-test-mode=rndrw --time=1800 --file-rw-ratio=1 --threads=16  run</span></span><br><span class="line">sysbench <span class="number">1.0</span><span class="number">.10</span> (<span class="keyword">using</span> bundled LuaJIT <span class="number">2.1</span><span class="number">.0</span>-beta2)</span><br><span class="line"></span><br><span class="line">Running <span class="keyword">the</span> test <span class="keyword">with</span> following options:</span><br><span class="line">Number <span class="keyword">of</span> threads: <span class="number">16</span></span><br><span class="line">Initializing <span class="built_in">random</span> <span class="built_in">number</span> generator <span class="built_in">from</span> current <span class="built_in">time</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Extra <span class="built_in">file</span> <span class="built_in">open</span> flags: <span class="number">0</span></span><br><span class="line"><span class="number">8</span> <span class="built_in">files</span>, <span class="number">1</span>GiB <span class="keyword">each</span></span><br><span class="line"><span class="number">8</span>GiB total <span class="built_in">file</span> size</span><br><span class="line">Block size <span class="number">16</span>KiB</span><br><span class="line">Number <span class="keyword">of</span> IO requests: <span class="number">0</span></span><br><span class="line">Read/Write ratio <span class="keyword">for</span> combined <span class="built_in">random</span> IO test: <span class="number">1.00</span></span><br><span class="line">Periodic FSYNC enabled, calling fsync() <span class="keyword">each</span> <span class="number">100</span> requests.</span><br><span class="line">Calling fsync() <span class="keyword">at</span> <span class="keyword">the</span> <span class="function"><span class="keyword">end</span> <span class="title">of</span> <span class="title">test</span>, <span class="title">Enabled</span>.</span></span><br><span class="line">Using synchronous I/O mode</span><br><span class="line">Doing <span class="built_in">random</span> r/w test</span><br><span class="line">Initializing worker threads...</span><br><span class="line"></span><br><span class="line">Threads started!</span><br><span class="line"></span><br><span class="line">File operations:</span><br><span class="line">    reads/s:                      <span class="number">2000.70</span></span><br><span class="line">    writes/s:                     <span class="number">2000.70</span></span><br><span class="line">    fsyncs/s:                     <span class="number">320.11</span></span><br><span class="line"></span><br><span class="line">Throughput:</span><br><span class="line">    <span class="built_in">read</span>, MiB/s:                  <span class="number">31.26</span></span><br><span class="line">    written, MiB/s:               <span class="number">31.26</span></span><br><span class="line"></span><br><span class="line">General statistics:</span><br><span class="line">    total <span class="built_in">time</span>:                          <span class="number">1800.0141</span>s</span><br><span class="line">    total <span class="built_in">number</span> <span class="keyword">of</span> events:              <span class="number">7778808</span></span><br><span class="line"></span><br><span class="line">Latency (ms):</span><br><span class="line">         <span class="built_in">min</span>:                                  <span class="number">0.00</span></span><br><span class="line">         <span class="built_in">avg</span>:                                  <span class="number">3.70</span></span><br><span class="line">         <span class="built_in">max</span>:                                <span class="number">465.40</span></span><br><span class="line">         <span class="number">95</span>th percentile:                      <span class="number">9.56</span></span><br><span class="line">         <span class="built_in">sum</span>:                            <span class="number">28782042.44</span></span><br><span class="line"></span><br><span class="line">Threads fairness:</span><br><span class="line">    events (<span class="built_in">avg</span>/stddev):           <span class="number">486175.5000</span>/<span class="number">1821.33</span></span><br><span class="line">    execution <span class="built_in">time</span> (<span class="built_in">avg</span>/stddev):   <span class="number">1798.8777</span>/<span class="number">0.02</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<ol>
+<li>顺序读写</li>
+</ol>
+</blockquote>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">$ sysbench fileio --<span class="keyword">file</span>-total-size=<span class="number">8</span>G --<span class="keyword">file</span>-num=<span class="number">8</span> --<span class="keyword">file</span>-test-<span class="keyword">mode</span>=seqrewr --time=<span class="number">600</span> --<span class="keyword">file</span>-rw-ratio=<span class="number">1</span> --threads=<span class="number">16</span>  run</span><br><span class="line">sysbench <span class="number">1.0</span>.<span class="number">10</span> (using bundled LuaJIT <span class="number">2.1</span>.<span class="number">0</span>-beta2)</span><br><span class="line"></span><br><span class="line">Running the test with following option<span class="variable">s:</span></span><br><span class="line">Number of thread<span class="variable">s:</span> <span class="number">16</span></span><br><span class="line">Initializing random <span class="keyword">number</span> generator from current time</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Extra <span class="keyword">file</span> <span class="keyword">open</span> flag<span class="variable">s:</span> <span class="number">0</span></span><br><span class="line"><span class="number">8</span> <span class="keyword">files</span>, <span class="number">1</span>GiB each</span><br><span class="line"><span class="number">8</span>GiB total <span class="keyword">file</span> size</span><br><span class="line">Block size <span class="number">16</span>KiB</span><br><span class="line">Periodic FSYNC enabled, calling fsync() each <span class="number">100</span> requests.</span><br><span class="line">Calling fsync() at the end of test, Enabled.</span><br><span class="line">Using synchronous I/O <span class="keyword">mode</span></span><br><span class="line">Doing sequential rewrite test</span><br><span class="line">Initializing worker threads...</span><br><span class="line"></span><br><span class="line">Threads started!</span><br><span class="line"></span><br><span class="line">File operation<span class="variable">s:</span></span><br><span class="line">    reads/<span class="variable">s:</span>                      <span class="number">0.00</span></span><br><span class="line">    writes/<span class="variable">s:</span>                     <span class="number">8186.76</span></span><br><span class="line">    fsyncs/<span class="variable">s:</span>                     <span class="number">654.93</span></span><br><span class="line"></span><br><span class="line">Throughpu<span class="variable">t:</span></span><br><span class="line">    <span class="keyword">read</span>, MiB/<span class="variable">s:</span>                  <span class="number">0.00</span></span><br><span class="line">    written, MiB/<span class="variable">s:</span>               <span class="number">127.92</span></span><br><span class="line"></span><br><span class="line">General statistic<span class="variable">s:</span></span><br><span class="line">    total time:                          <span class="number">600.1619</span>s</span><br><span class="line">    total <span class="keyword">number</span> of event<span class="variable">s:</span>              <span class="number">5306467</span></span><br><span class="line"></span><br><span class="line">Latency (ms):</span><br><span class="line">         <span class="built_in">min</span>:                                  <span class="number">0.00</span></span><br><span class="line">         av<span class="variable">g:</span>                                  <span class="number">1.81</span></span><br><span class="line">         <span class="built_in">max</span>:                                <span class="number">277.45</span></span><br><span class="line">         <span class="number">95</span><span class="keyword">th</span> percentile:                      <span class="number">0.75</span></span><br><span class="line">         sum:                            <span class="number">9597820.52</span></span><br><span class="line"></span><br><span class="line">Threads fairnes<span class="variable">s:</span></span><br><span class="line">    events (avg/stddev):           <span class="number">331654.1875</span>/<span class="number">4172.73</span></span><br><span class="line">    execution time (avg/stddev):   <span class="number">599.8638</span>/<span class="number">0.01</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<ol>
+<li>顺序写</li>
+</ol>
+</blockquote>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">$ sysbench fileio --<span class="keyword">file</span>-total-size=<span class="number">8</span>G --<span class="keyword">file</span>-num=<span class="number">8</span> --<span class="keyword">file</span>-test-<span class="keyword">mode</span>=seqwr --time=<span class="number">600</span> --<span class="keyword">file</span>-rw-ratio=<span class="number">1</span> --threads=<span class="number">16</span>  run</span><br><span class="line">sysbench <span class="number">1.0</span>.<span class="number">10</span> (using bundled LuaJIT <span class="number">2.1</span>.<span class="number">0</span>-beta2)</span><br><span class="line"></span><br><span class="line">Running the test with following option<span class="variable">s:</span></span><br><span class="line">Number of thread<span class="variable">s:</span> <span class="number">16</span></span><br><span class="line">Initializing random <span class="keyword">number</span> generator from current time</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Extra <span class="keyword">file</span> <span class="keyword">open</span> flag<span class="variable">s:</span> <span class="number">0</span></span><br><span class="line"><span class="number">8</span> <span class="keyword">files</span>, <span class="number">1</span>GiB each</span><br><span class="line"><span class="number">8</span>GiB total <span class="keyword">file</span> size</span><br><span class="line">Block size <span class="number">16</span>KiB</span><br><span class="line">Periodic FSYNC enabled, calling fsync() each <span class="number">100</span> requests.</span><br><span class="line">Calling fsync() at the end of test, Enabled.</span><br><span class="line">Using synchronous I/O <span class="keyword">mode</span></span><br><span class="line">Doing sequential <span class="keyword">write</span> (creation) test</span><br><span class="line">Initializing worker threads...</span><br><span class="line"></span><br><span class="line">Threads started!</span><br><span class="line"></span><br><span class="line">File operation<span class="variable">s:</span></span><br><span class="line">    reads/<span class="variable">s:</span>                      <span class="number">0.00</span></span><br><span class="line">    writes/<span class="variable">s:</span>                     <span class="number">8186.37</span></span><br><span class="line">    fsyncs/<span class="variable">s:</span>                     <span class="number">654.90</span></span><br><span class="line"></span><br><span class="line">Throughpu<span class="variable">t:</span></span><br><span class="line">    <span class="keyword">read</span>, MiB/<span class="variable">s:</span>                  <span class="number">0.00</span></span><br><span class="line">    written, MiB/<span class="variable">s:</span>               <span class="number">127.91</span></span><br><span class="line"></span><br><span class="line">General statistic<span class="variable">s:</span></span><br><span class="line">    total time:                          <span class="number">600.1297</span>s</span><br><span class="line">    total <span class="keyword">number</span> of event<span class="variable">s:</span>              <span class="number">5305927</span></span><br><span class="line"></span><br><span class="line">Latency (ms):</span><br><span class="line">         <span class="built_in">min</span>:                                  <span class="number">0.00</span></span><br><span class="line">         av<span class="variable">g:</span>                                  <span class="number">1.81</span></span><br><span class="line">         <span class="built_in">max</span>:                                <span class="number">306.93</span></span><br><span class="line">         <span class="number">95</span><span class="keyword">th</span> percentile:                      <span class="number">0.78</span></span><br><span class="line">         sum:                            <span class="number">9597135.97</span></span><br><span class="line"></span><br><span class="line">Threads fairnes<span class="variable">s:</span></span><br><span class="line">    events (avg/stddev):           <span class="number">331620.4375</span>/<span class="number">5134.81</span></span><br><span class="line">    execution time (avg/stddev):   <span class="number">599.8210</span>/<span class="number">0.01</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<ol>
+<li>顺序读 </li>
+</ol>
+</blockquote>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">$ sysbench fileio --<span class="keyword">file</span>-total-size=<span class="number">8</span>G --<span class="keyword">file</span>-num=<span class="number">8</span> --<span class="keyword">file</span>-test-<span class="keyword">mode</span>=seqrd --time=<span class="number">600</span> --<span class="keyword">file</span>-rw-ratio=<span class="number">1</span> --threads=<span class="number">16</span>  run</span><br><span class="line">sysbench <span class="number">1.0</span>.<span class="number">10</span> (using bundled LuaJIT <span class="number">2.1</span>.<span class="number">0</span>-beta2)</span><br><span class="line"></span><br><span class="line">Running the test with following option<span class="variable">s:</span></span><br><span class="line">Number of thread<span class="variable">s:</span> <span class="number">16</span></span><br><span class="line">Initializing random <span class="keyword">number</span> generator from current time</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Extra <span class="keyword">file</span> <span class="keyword">open</span> flag<span class="variable">s:</span> <span class="number">0</span></span><br><span class="line"><span class="number">8</span> <span class="keyword">files</span>, <span class="number">1</span>GiB each</span><br><span class="line"><span class="number">8</span>GiB total <span class="keyword">file</span> size</span><br><span class="line">Block size <span class="number">16</span>KiB</span><br><span class="line">Periodic FSYNC enabled, calling fsync() each <span class="number">100</span> requests.</span><br><span class="line">Calling fsync() at the end of test, Enabled.</span><br><span class="line">Using synchronous I/O <span class="keyword">mode</span></span><br><span class="line">Doing sequential <span class="keyword">read</span> test</span><br><span class="line">Initializing worker threads...</span><br><span class="line"></span><br><span class="line">Threads started!</span><br><span class="line"></span><br><span class="line">File operation<span class="variable">s:</span></span><br><span class="line">    reads/<span class="variable">s:</span>                      <span class="number">724368.39</span></span><br><span class="line">    writes/<span class="variable">s:</span>                     <span class="number">0.00</span></span><br><span class="line">    fsyncs/<span class="variable">s:</span>                     <span class="number">0.00</span></span><br><span class="line"></span><br><span class="line">Throughpu<span class="variable">t:</span></span><br><span class="line">    <span class="keyword">read</span>, MiB/<span class="variable">s:</span>                  <span class="number">11318.26</span></span><br><span class="line">    written, MiB/<span class="variable">s:</span>               <span class="number">0.00</span></span><br><span class="line"></span><br><span class="line">General statistic<span class="variable">s:</span></span><br><span class="line">    total time:                          <span class="number">600.0003</span>s</span><br><span class="line">    total <span class="keyword">number</span> of event<span class="variable">s:</span>              <span class="number">434622830</span></span><br><span class="line"></span><br><span class="line">Latency (ms):</span><br><span class="line">         <span class="built_in">min</span>:                                  <span class="number">0.00</span></span><br><span class="line">         av<span class="variable">g:</span>                                  <span class="number">0.02</span></span><br><span class="line">         <span class="built_in">max</span>:                                 <span class="number">20.95</span></span><br><span class="line">         <span class="number">95</span><span class="keyword">th</span> percentile:                      <span class="number">0.03</span></span><br><span class="line">         sum:                            <span class="number">6794650.94</span></span><br><span class="line"></span><br><span class="line">Threads fairnes<span class="variable">s:</span></span><br><span class="line">    events (avg/stddev):           <span class="number">27163926.8750</span>/<span class="number">1054351.39</span></span><br><span class="line">    execution time (avg/stddev):   <span class="number">424.6657</span>/<span class="number">2.57</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>清理测试数据（cleanup）</li>
+</ul>
+<figure class="highlight gams"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">$</span> sysbench  fileio --<span class="keyword">file</span>-total-size=<span class="number">8</span>G --<span class="keyword">file</span>-num=<span class="number">8</span> cleanup</span><br><span class="line">sysbench <span class="number">1.0</span><span class="number">.10</span> (<span class="keyword">using</span> bundled LuaJIT <span class="number">2.1</span><span class="number">.0</span>-beta2)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="title">Removing</span></span> test <span class="keyword">files</span>...</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/sysbench/" rel="tag"># sysbench</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/12/07/Logstash处理nginx日志grok配置/" rel="next" title="Logstash处理nginx日志grok配置">
+                <i class="fa fa-chevron-left"></i> Logstash处理nginx日志grok配置
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/12/19/docker容器网络一/" rel="prev" title="docker容器网络一">
+                docker容器网络一 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.gif"
+                alt="devil" />
+            
+              <p class="site-author-name" itemprop="name">devil</p>
+              <p class="site-description motion-element" itemprop="description">Good Good Study！Day Day Up！</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">27</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">18</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/rss2.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/hanjh310" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#前面已经介绍了sysbench的参数，本文介绍使用sysbench测试磁盘io"><span class="nav-number">1.</span> <span class="nav-text">前面已经介绍了sysbench的参数，本文介绍使用sysbench测试磁盘io</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#环境介绍："><span class="nav-number">1.1.</span> <span class="nav-text">环境介绍：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#fileio的基本参数："><span class="nav-number">1.2.</span> <span class="nav-text">fileio的基本参数：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#测试分为三个阶段"><span class="nav-number">1.3.</span> <span class="nav-text">测试分为三个阶段</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">devil</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.3</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://https-blog-loveops-org.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://blog.loveops.com/2017/12/08/sysbench测试磁盘IO/';
+          this.page.identifier = '2017/12/08/sysbench测试磁盘IO/';
+          this.page.title = 'sysbench测试磁盘IO';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://https-blog-loveops-org.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="linux," />
+
+
+
+
+
+  <link rel="alternate" href="/rss2.xml" title="LoveOps" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="介绍linux的ip命令和ifconfig类似，但前者功能更强大，并旨在取代后者。使用ip命令，只需一个命令，你就能很轻松地执行一些网络管理任务。ifconfig是net-tools中已被废弃使用的一个命令，许多年前就已经没有维护了。iproute2套件里提供了许多增强功能的命令，ip命令即是其中之一。 IP查询命令 ">
+<meta name="keywords" content="linux">
+<meta property="og:type" content="article">
+<meta property="og:title" content="IP命令集">
+<meta property="og:url" content="http://blog.loveops.com/2017/11/22/IP命令集/index.html">
+<meta property="og:site_name" content="LoveOps">
+<meta property="og:description" content="介绍linux的ip命令和ifconfig类似，但前者功能更强大，并旨在取代后者。使用ip命令，只需一个命令，你就能很轻松地执行一些网络管理任务。ifconfig是net-tools中已被废弃使用的一个命令，许多年前就已经没有维护了。iproute2套件里提供了许多增强功能的命令，ip命令即是其中之一。 IP查询命令 addr  显示ip地址和属性信息（address的缩写） 123ip addr">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-12-22T03:46:51.256Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="IP命令集">
+<meta name="twitter:description" content="介绍linux的ip命令和ifconfig类似，但前者功能更强大，并旨在取代后者。使用ip命令，只需一个命令，你就能很轻松地执行一些网络管理任务。ifconfig是net-tools中已被废弃使用的一个命令，许多年前就已经没有维护了。iproute2套件里提供了许多增强功能的命令，ip命令即是其中之一。 IP查询命令 addr  显示ip地址和属性信息（address的缩写） 123ip addr">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://blog.loveops.com/2017/11/22/IP命令集/"/>
+
+
+
+
+
+  <title>IP命令集 | LoveOps</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">LoveOps</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Devil'Blog</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.loveops.com/2017/11/22/IP命令集/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="devil">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LoveOps">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">IP命令集</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-11-22T11:45:47+08:00">
+                2017-11-22
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/linux/" itemprop="url" rel="index">
+                    <span itemprop="name">linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/11/22/IP命令集/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2017/11/22/IP命令集/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  1,232
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  6
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h4 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h4><p>linux的ip命令和ifconfig类似，但前者功能更强大，并旨在取代后者。使用ip命令，只需一个命令，你就能很轻松地执行一些网络管理任务。ifconfig是net-tools中已被废弃使用的一个命令，许多年前就已经没有维护了。iproute2套件里提供了许多增强功能的命令，ip命令即是其中之一。</p>
+<h4 id="IP查询命令"><a href="#IP查询命令" class="headerlink" title="IP查询命令"></a>IP查询命令</h4><ul>
+<li><p>addr  显示ip地址和属性信息（address的缩写）</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ip addr  显示所有地址信息</span><br><span class="line"></span><br><span class="line">ip addr show dev eth0  只显示eth0的信息</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>link 管理和显示所有网络接口的状态</p>
+</li>
+</ul>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ip link 显示所有接口的信息</span><br><span class="line"></span><br><span class="line">ip link show dev eth0  只显示eth0的信息</span><br><span class="line"></span><br><span class="line">ip -s link  显示接口统计</span><br></pre></td></tr></table></figure>
+<ul>
+<li>route 显示和修改路由表</li>
+</ul>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip<span class="built_in"> route </span>列出内核中所有的路由条目</span><br></pre></td></tr></table></figure>
+<ul>
+<li><p>maddr 管理和显示多播地址</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ip maddr 显示所有接口的多播地址</span><br><span class="line"></span><br><span class="line">ip maddr show dev eth0  只显示eth0的多播地址</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>neigh 显示邻居对象，也就是ipv4的arp表</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ip neigh  显示邻居对象</span><br><span class="line"></span><br><span class="line">ip neigh show dev eth0 显示eth0的邻居对象</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>help 显示子命令和字命令参数的帮助信息</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">ip help  显示ip子命令和参数的帮助信息</span><br><span class="line"></span><br><span class="line">ip addr help  显示 addr 子命令的帮助信息</span><br><span class="line"></span><br><span class="line">ip link help  显示 link 子命令的帮助信息</span><br><span class="line"></span><br><span class="line">ip neigh help 显示 neigh 子命令的帮助信息</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h4 id="多播地址管理"><a href="#多播地址管理" class="headerlink" title="多播地址管理"></a>多播地址管理</h4><ul>
+<li><p>maddr add 添加静态链路层多播地址</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">ip</span> <span class="selector-tag">maddr</span> <span class="selector-tag">add</span> 33<span class="selector-pseudo">:33</span><span class="selector-pseudo">:00</span><span class="selector-pseudo">:00</span><span class="selector-pseudo">:00</span><span class="selector-pseudo">:01</span> <span class="selector-tag">dev</span> <span class="selector-tag">eth0</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>maddr del  删除一个多播地址</p>
+</li>
+</ul>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">ip</span> <span class="selector-tag">maddr</span> <span class="selector-tag">del</span> 33<span class="selector-pseudo">:33</span><span class="selector-pseudo">:00</span><span class="selector-pseudo">:00</span><span class="selector-pseudo">:00</span><span class="selector-pseudo">:01</span> <span class="selector-tag">dev</span> <span class="selector-tag">eth0</span></span><br></pre></td></tr></table></figure>
+<h4 id="修改地址和链接属性"><a href="#修改地址和链接属性" class="headerlink" title="修改地址和链接属性"></a>修改地址和链接属性</h4><ul>
+<li><p>addr add  添加一个地址</p>
+<figure class="highlight lsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip addr add <span class="number">192.168</span><span class="number">.1</span><span class="number">.1</span>/<span class="number">24</span> dev eth0   #在eth0上添加<span class="number">192.168</span><span class="number">.1</span><span class="number">.1</span>掩码<span class="number">24</span>位的地址</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>addr del  删除一个地址</p>
+<figure class="highlight lsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip addr del <span class="number">192.168</span><span class="number">.1</span><span class="number">.1</span>/<span class="number">24</span> dev eth0   #从eth0上删除<span class="number">192.168</span><span class="number">.1</span><span class="number">.1</span>掩码<span class="number">24</span>位的地址</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>link set  修改接口状态</p>
+</li>
+</ul>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">ip link <span class="builtin-name">set</span> eth0 up  #开启eth0</span><br><span class="line"></span><br><span class="line">ip link <span class="builtin-name">set</span> eth0 down #关闭eth0 </span><br><span class="line"></span><br><span class="line">ip link <span class="builtin-name">set</span> eth0 mtu 9000 #设置eth0的mtu为9000</span><br><span class="line"></span><br><span class="line">ip link ser eth0 promisc on #开启eth0的混杂模式</span><br></pre></td></tr></table></figure>
+<h4 id="调整和查看路由表"><a href="#调整和查看路由表" class="headerlink" title="调整和查看路由表"></a>调整和查看路由表</h4><ul>
+<li><p>route add  #添加一条路由表条目</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ip<span class="built_in"> route </span><span class="builtin-name">add</span><span class="built_in"> default </span>via 192.168.1.1 dev eth0 #在接口eth0上添加默认网关192.168.1.1</span><br><span class="line"></span><br><span class="line">ip<span class="built_in"> route </span><span class="builtin-name">add</span> 192.168.1.0/24 via 192.168.1.1 #为192.168.0.0/24的地址添加默认网关192.168.1.1</span><br><span class="line"></span><br><span class="line">ip<span class="built_in"> route </span><span class="builtin-name">add</span> 192.168.1.0/24 dev eth0 #添加访问192.168.1.0/24 可以从eth0接口出去</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>route delete  #删除一条路由条目</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip<span class="built_in"> route </span>delete 192.168.1.0/24 via 192.168.1.1</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>route replace  #替换路由条目，如果没有定义就添加</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip<span class="built_in"> route </span>replace 192.168.1.0/24 dev eth0</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>route get #显示一个地址将要走的路由</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip<span class="built_in"> route </span><span class="builtin-name">get</span> 192.168.1.5  #显示192.168.1.5将走的路由</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h4 id="管理arp表"><a href="#管理arp表" class="headerlink" title="管理arp表"></a>管理arp表</h4><ul>
+<li><p>neigh add #向arp表添加一条arp条目</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">ip</span> <span class="selector-tag">neigh</span> <span class="selector-tag">add</span> 192<span class="selector-class">.168</span><span class="selector-class">.1</span><span class="selector-class">.1</span> <span class="selector-tag">lladdr</span> 1<span class="selector-pseudo">:2</span><span class="selector-pseudo">:3</span><span class="selector-pseudo">:4</span><span class="selector-pseudo">:5</span><span class="selector-pseudo">:6</span> <span class="selector-tag">dev</span> <span class="selector-tag">eth0</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>neigh del #使arp条目失效</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">ip</span> <span class="selector-tag">neigh</span> <span class="selector-tag">del</span> 192<span class="selector-class">.168</span><span class="selector-class">.1</span><span class="selector-class">.1</span> <span class="selector-tag">dev</span> <span class="selector-tag">eth0</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>neigh replace #替换arp条目，如果不存在就添加</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">ip</span> <span class="selector-tag">neigh</span> <span class="selector-tag">replace</span> 192<span class="selector-class">.168</span><span class="selector-class">.1</span><span class="selector-class">.1</span> <span class="selector-tag">lladdr</span> 1<span class="selector-pseudo">:2</span><span class="selector-pseudo">:3</span><span class="selector-pseudo">:4</span><span class="selector-pseudo">:5</span><span class="selector-pseudo">:6</span> <span class="selector-tag">dev</span> <span class="selector-tag">eth0</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h4 id="有用的命令（不一定来自iproute）"><a href="#有用的命令（不一定来自iproute）" class="headerlink" title="有用的命令（不一定来自iproute）"></a>有用的命令（不一定来自iproute）</h4><ul>
+<li><p>arping  #向邻居发送arp请求</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">arping</span> <span class="selector-tag">-I</span> <span class="selector-tag">eth0</span> 192<span class="selector-class">.168</span><span class="selector-class">.1</span><span class="selector-class">.1</span> # 通过<span class="selector-tag">eth0</span>向192<span class="selector-class">.168</span><span class="selector-class">.1</span><span class="selector-class">.1</span>发送<span class="selector-tag">arp</span>请求</span><br><span class="line"></span><br><span class="line"><span class="selector-tag">arping</span> <span class="selector-tag">-D</span> <span class="selector-tag">-I</span> <span class="selector-tag">eth0</span> 192<span class="selector-class">.168</span><span class="selector-class">.1</span><span class="selector-class">.1</span> #在<span class="selector-tag">eth0</span> 上检查192<span class="selector-class">.168</span><span class="selector-class">.1</span><span class="selector-class">.1</span>重复的<span class="selector-tag">mac</span>地址</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>ethtool #查询或控制网络驱动程序和硬件设置</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">ethtool</span> -g eth0  <span class="comment">#显示eth0的环形缓冲区</span></span><br><span class="line">ethtool -i eth0  <span class="comment">#显示eth0的驱动程序信息</span></span><br><span class="line">ethtool -p eth0  <span class="comment">#通过瞄准识别eth0，通常通过使LED闪烁在网络端口上</span></span><br><span class="line">ethtool -S eth0  <span class="comment">#显示eth0的网络和驱动程序统计信息</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>ss 显示套接字统计。以下选项可以组合使用</p>
+<figure class="highlight livecodeserver"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ss -<span class="keyword">a</span> <span class="comment">#显示所有套接字（不管是否listen）</span></span><br><span class="line">ss -e <span class="comment">#显示套接字的详细信息</span></span><br><span class="line">ss -o <span class="comment">#显示计时器信息</span></span><br><span class="line">ss -n <span class="comment">#不解析地址</span></span><br><span class="line">ss -p <span class="comment">#使用套接字显示进程</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h4 id="NETTOOLS与IPROUTE对比"><a href="#NETTOOLS与IPROUTE对比" class="headerlink" title="NETTOOLS与IPROUTE对比"></a>NETTOOLS与IPROUTE对比</h4><table>
+<thead>
+<tr>
+<th>NETTOOLS命令</th>
+<th>IPROUTE命令</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>arp -a</td>
+<td>ip neigh</td>
+</tr>
+<tr>
+<td>arp -v</td>
+<td>ip -s neigh</td>
+</tr>
+<tr>
+<td>arp -s 192.168.1.1 1:2:3:4:5:6</td>
+<td>ip neigh add 192.168.1.1 lladdr 1:2:3:4:5:6 dev eth1</td>
+</tr>
+<tr>
+<td>arp -i eth1 -d 192.168.1.1</td>
+<td>ip neigh del 192.168.1.1 dev eth1</td>
+</tr>
+<tr>
+<td>ifconfig -a</td>
+<td>ip addr</td>
+</tr>
+<tr>
+<td>ifconfig eth0 down</td>
+<td>ip link set eth0 down</td>
+</tr>
+<tr>
+<td>ifconfig eth0 up</td>
+<td>ip link set eth0 up</td>
+</tr>
+<tr>
+<td>ifconfig eth0 192.168.1.1</td>
+<td>ip addr add 192.168.1.1/24 dev eth0</td>
+</tr>
+<tr>
+<td>ifconfig eth0 netmask 255.255.255.0</td>
+<td>ip addr add 192.168.1.1/24 dev eth0</td>
+</tr>
+<tr>
+<td>ifconfig eth0 mtu 9000</td>
+<td>ip link set eth0 mtu 9000</td>
+</tr>
+<tr>
+<td>ifconfig eth0:0 192.168.1.2</td>
+<td>ip addr add 192.168.1.2/24 dev eth0</td>
+</tr>
+<tr>
+<td>netstat</td>
+<td>ss</td>
+</tr>
+<tr>
+<td>netstat -neopa</td>
+<td>ss -neopa</td>
+</tr>
+<tr>
+<td>netstat -g</td>
+<td>ip maddr</td>
+</tr>
+<tr>
+<td>route</td>
+<td>ip route</td>
+</tr>
+<tr>
+<td>route add -net 192.168.1.0 netmask 255.255.255.0 dev eth0</td>
+<td>ip route add 192.168.1.0/24 dev eth0</td>
+</tr>
+<tr>
+<td>route add default gw 192.168.1.1</td>
+<td>ip route add default via 192.168.1.1</td>
+</tr>
+</tbody>
+</table>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/linux/" rel="tag"># linux</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/12/09/HTTP基准测试工具AB介绍/" rel="next" title="HTTP基准测试工具AB介绍">
+                <i class="fa fa-chevron-left"></i> HTTP基准测试工具AB介绍
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/11/27/ElasticSearch-Index和Type的区别/" rel="prev" title="ElasticSearch-Index和Type的区别">
+                ElasticSearch-Index和Type的区别 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.gif"
+                alt="devil" />
+            
+              <p class="site-author-name" itemprop="name">devil</p>
+              <p class="site-description motion-element" itemprop="description">Good Good Study！Day Day Up！</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">27</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">18</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/rss2.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/hanjh310" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#介绍"><span class="nav-number">1.</span> <span class="nav-text">介绍</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#IP查询命令"><span class="nav-number">2.</span> <span class="nav-text">IP查询命令</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#多播地址管理"><span class="nav-number">3.</span> <span class="nav-text">多播地址管理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#修改地址和链接属性"><span class="nav-number">4.</span> <span class="nav-text">修改地址和链接属性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#调整和查看路由表"><span class="nav-number">5.</span> <span class="nav-text">调整和查看路由表</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#管理arp表"><span class="nav-number">6.</span> <span class="nav-text">管理arp表</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#有用的命令（不一定来自iproute）"><span class="nav-number">7.</span> <span class="nav-text">有用的命令（不一定来自iproute）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#NETTOOLS与IPROUTE对比"><span class="nav-number">8.</span> <span class="nav-text">NETTOOLS与IPROUTE对比</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">devil</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.3</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://https-blog-loveops-org.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://blog.loveops.com/2017/11/22/IP命令集/';
+          this.page.identifier = '2017/11/22/IP命令集/';
+          this.page.title = 'IP命令集';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://https-blog-loveops-org.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

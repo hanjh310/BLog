@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="ab," />
+
+
+
+
+
+  <link rel="alternate" href="/rss2.xml" title="LoveOps" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="介绍ab是apahce自带的一个http服务器基准测试工具，它不仅可以对apache服务器进行网站访问压力测试，也可以对或其它类型的服务器进行压力测试。比如nginx、tomcat、IIS等。 用法1234567891011121314151617181920212223242526272829303132333435">
+<meta name="keywords" content="ab">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HTTP基准测试工具AB介绍">
+<meta property="og:url" content="http://blog.loveops.com/2016/12/09/HTTP基准测试工具AB介绍/index.html">
+<meta property="og:site_name" content="LoveOps">
+<meta property="og:description" content="介绍ab是apahce自带的一个http服务器基准测试工具，它不仅可以对apache服务器进行网站访问压力测试，也可以对或其它类型的服务器进行压力测试。比如nginx、tomcat、IIS等。 用法1234567891011121314151617181920212223242526272829303132333435363738Usage: ab [options] [http[s]://]ho">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-12-09T13:03:22.573Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="HTTP基准测试工具AB介绍">
+<meta name="twitter:description" content="介绍ab是apahce自带的一个http服务器基准测试工具，它不仅可以对apache服务器进行网站访问压力测试，也可以对或其它类型的服务器进行压力测试。比如nginx、tomcat、IIS等。 用法1234567891011121314151617181920212223242526272829303132333435363738Usage: ab [options] [http[s]://]ho">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://blog.loveops.com/2016/12/09/HTTP基准测试工具AB介绍/"/>
+
+
+
+
+
+  <title>HTTP基准测试工具AB介绍 | LoveOps</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">LoveOps</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Devil'Blog</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.loveops.com/2016/12/09/HTTP基准测试工具AB介绍/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="devil">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LoveOps">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">HTTP基准测试工具AB介绍</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-12-09T20:59:29+08:00">
+                2016-12-09
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/http/" itemprop="url" rel="index">
+                    <span itemprop="name">http</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2016/12/09/HTTP基准测试工具AB介绍/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2016/12/09/HTTP基准测试工具AB介绍/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  1,077
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  5
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h4 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h4><p>ab是apahce自带的一个http服务器基准测试工具，它不仅可以对apache服务器进行网站访问压力测试，也可以对或其它类型的服务器进行压力测试。比如nginx、tomcat、IIS等。</p>
+<h4 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h4><figure class="highlight haml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">Usage: ab [options] [http[s]://]hostname[:port]/path</span><br><span class="line">Options are:</span><br><span class="line">    -<span class="ruby">n requests     Number of requests to perform</span></span><br><span class="line"><span class="ruby">    -c concurrency  同时向服务器端发送的请求数目，默认状态下是一次 只执行一个http请求.</span></span><br><span class="line"><span class="ruby">    -t timelimit    设置测试的时间的长短，使用这个选项ab将自动设置测试请求会话数目为<span class="number">50000</span>，然后以你设置的时间为固定周期.默认状态下是没有时限的，也就是直到完成你所设置的请求数目为止.</span></span><br><span class="line"><span class="ruby">    -s timeout      每个请求的超时时间.默认是<span class="number">30</span>秒</span></span><br><span class="line"><span class="ruby">    -b windowsize   发送/接受TCPbuffer的大小，以字节为单位</span></span><br><span class="line"><span class="ruby">    -B address      在向外连接时候绑定的地址</span></span><br><span class="line"><span class="ruby">    -p postfile     POST请求包含的数据文件. 配合-T参数使用</span></span><br><span class="line"><span class="ruby">    -u putfile      PUT请求包含的是数据文件. 配合-T参数使用</span></span><br><span class="line"><span class="ruby">    -T content-type 设置Content-type header信息 用于 POST/PUT请求, 例如</span></span><br><span class="line"><span class="ruby"><span class="string">'application/x-www-form-urlencoded'</span>，默认 <span class="string">'text/plain'</span></span></span><br><span class="line"><span class="ruby">    -v verbosity    设置打印输出级别，数字越大显示信息越详细</span></span><br><span class="line"><span class="ruby">    -w              以HTML格式打印结果</span></span><br><span class="line"><span class="ruby">    -i              使用HEAD代替GET</span></span><br><span class="line"><span class="ruby">    -x attributes   String to insert as table attributes</span></span><br><span class="line"><span class="ruby">    -y attributes   String to insert as tr attributes</span></span><br><span class="line"><span class="ruby">    -z attributes   String to insert as td <span class="keyword">or</span> th attributes</span></span><br><span class="line"><span class="ruby">    -C attribute    添加cookie信息, 比如. <span class="string">'Apache=1234'</span>. (repeatable)</span></span><br><span class="line"><span class="ruby">    -H attribute    增加额外的头部信息, 比如 <span class="string">'Accept-Encoding: gzip'</span></span></span><br><span class="line"><span class="ruby">    -A attribute    向服务器提供基本认证信息, 冒号分割用户名密码</span></span><br><span class="line"><span class="ruby">    -P attribute    向代理服务器提供基本认证信息，冒号分割用户名密码</span></span><br><span class="line"><span class="ruby">    -X <span class="symbol">proxy:</span>port   代理服务器的地址和端口</span></span><br><span class="line"><span class="ruby">    -V              显示版本号并退出</span></span><br><span class="line"><span class="ruby">    -k              使用keep-alive功能</span></span><br><span class="line"><span class="ruby">    -d              输出结果不显示请求时间百分比信息.</span></span><br><span class="line"><span class="ruby">    -S              不显示平均指的标准误差值（也就是[+<span class="regexp">/-sd]）.</span></span></span><br><span class="line"><span class="ruby">    -q              不显示执行超过<span class="number">150</span>个请求进度</span></span><br><span class="line"><span class="ruby">    -l              接受动态相应结果 (对动态页面比较管用)</span></span><br><span class="line"><span class="ruby">    -g filename     将每个请求的时间输出到一个文件中.</span></span><br><span class="line"><span class="ruby">    -e filename     将每个请求的时间输出到一个csv文件中</span></span><br><span class="line"><span class="ruby">    -r              socket错误时不退出</span></span><br><span class="line"><span class="ruby">    -m method       方法名称</span></span><br><span class="line"><span class="ruby">    -h              显示帮助信息</span></span><br><span class="line"><span class="ruby">    -I              Disable TLS Server Name Indication (SNI) extension</span></span><br><span class="line"><span class="ruby">    -Z ciphersuite  Specify SSL/TLS cipher suite (See openssl ciphers)</span></span><br><span class="line"><span class="ruby">    -f protocol     Specify SSL/TLS protocol</span></span><br><span class="line"><span class="ruby">                    (SSL3, TLS1, TLS1.<span class="number">1</span>, TLS1.<span class="number">2</span> <span class="keyword">or</span> ALL)</span></span><br></pre></td></tr></table></figure>
+<h4 id="简单测试结果"><a href="#简单测试结果" class="headerlink" title="简单测试结果"></a>简单测试结果</h4><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">$</span> <span class="string">ab</span> <span class="bullet">-c</span> <span class="number">10</span> <span class="bullet">-n</span> <span class="number">100</span> <span class="attr">https://blog.loveops.org/</span></span><br><span class="line"><span class="string">This</span> <span class="string">is</span> <span class="string">ApacheBench,</span> <span class="string">Version</span> <span class="number">2.3</span> <span class="string">&lt;$Revision:</span> <span class="number">1796539</span> <span class="string">$&gt;</span></span><br><span class="line"><span class="string">Copyright</span> <span class="number">1996</span> <span class="string">Adam</span> <span class="string">Twiss,</span> <span class="string">Zeus</span> <span class="string">Technology</span> <span class="string">Ltd,</span> <span class="attr">http://www.zeustech.net/</span></span><br><span class="line"><span class="string">Licensed</span> <span class="string">to</span> <span class="string">The</span> <span class="string">Apache</span> <span class="string">Software</span> <span class="string">Foundation,</span> <span class="attr">http://www.apache.org/</span></span><br><span class="line"></span><br><span class="line"><span class="string">Benchmarking</span> <span class="string">blog.loveops.org</span> <span class="string">(be</span> <span class="string">patient).....done</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="string">Server</span> <span class="attr">Software:</span>        <span class="string">nginx/1.10.3</span></span><br><span class="line"><span class="string">Server</span> <span class="attr">Hostname:</span>        <span class="string">blog.loveops.org</span></span><br><span class="line"><span class="string">Server</span> <span class="attr">Port:</span>            <span class="number">443</span></span><br><span class="line"><span class="string">SSL/TLS</span> <span class="attr">Protocol:</span>       <span class="string">TLSv1.2,ECDHE-RSA-AES256-GCM-SHA384,2048,256</span></span><br><span class="line"><span class="string">TLS</span> <span class="string">Server</span> <span class="attr">Name:</span>        <span class="string">blog.loveops.org</span></span><br><span class="line"></span><br><span class="line"><span class="string">Document</span> <span class="attr">Path:</span>          <span class="string">/</span>     <span class="comment">#请求URI  </span></span><br><span class="line"><span class="string">Document</span> <span class="attr">Length:</span>        <span class="number">57416</span> <span class="string">bytes</span>  <span class="comment">#请求返回文档大小，这个数值如果变化，则被认为是错误</span></span><br><span class="line"></span><br><span class="line"><span class="string">Concurrency</span> <span class="attr">Level:</span>      <span class="number">10</span>  <span class="comment">#并发连接数</span></span><br><span class="line"><span class="string">Time</span> <span class="string">taken</span> <span class="string">for</span> <span class="attr">tests:</span>   <span class="number">21.204</span> <span class="string">seconds</span>  <span class="comment">#测试时间</span></span><br><span class="line"><span class="string">Complete</span> <span class="attr">requests:</span>      <span class="number">100</span> <span class="comment">#完成总请求数</span></span><br><span class="line"><span class="string">Failed</span> <span class="attr">requests:</span>        <span class="number">0</span>   <span class="comment">#失败请求数</span></span><br><span class="line"><span class="string">Total</span> <span class="attr">transferred:</span>      <span class="number">5767500</span> <span class="string">bytes</span> <span class="comment"># 网络传输量</span></span><br><span class="line"><span class="string">HTML</span> <span class="attr">transferred:</span>       <span class="number">5741600</span> <span class="string">bytes</span> <span class="comment"># html传输量</span></span><br><span class="line"><span class="string">Requests</span> <span class="string">per</span> <span class="attr">second:</span>    <span class="number">4.72</span> <span class="string">[#/sec]</span> <span class="string">(mean)</span> <span class="comment">#每秒请求数（平均）</span></span><br><span class="line"><span class="string">Time</span> <span class="string">per</span> <span class="attr">request:</span>       <span class="number">2120.353</span> <span class="string">[ms]</span> <span class="string">(mean)</span> <span class="comment"># （每次请求花费的平均时间）</span></span><br><span class="line"><span class="string">Time</span> <span class="string">per</span> <span class="attr">request:</span>       <span class="number">212.035</span> <span class="string">[ms]</span> <span class="string">(mean,</span> <span class="string">across</span> <span class="string">all</span> <span class="string">concurrent</span> <span class="string">requests)</span>     <span class="comment"># 服务器平均请求处理时间</span></span><br><span class="line"><span class="string">Transfer</span> <span class="attr">rate:</span>          <span class="number">265.63</span> <span class="string">[Kbytes/sec]</span> <span class="string">received</span> <span class="comment">#平均每秒网络上的流量，可以帮助排除是否存在网络流量过大导致响应时间延长的问题</span></span><br><span class="line"></span><br><span class="line"><span class="string">Connection</span> <span class="string">Times</span> <span class="string">(ms)</span>   <span class="comment"># 网络上消耗的时间的分解</span></span><br><span class="line">              <span class="string">min</span>  <span class="string">mean[+/-sd]</span> <span class="string">median</span>   <span class="string">max</span></span><br><span class="line"><span class="attr">Connect:</span>      <span class="number">128</span>  <span class="number">910</span> <span class="number">1140.1</span>    <span class="number">588</span>    <span class="number">8981</span></span><br><span class="line"><span class="attr">Processing:</span>   <span class="number">229</span>  <span class="number">993</span> <span class="number">711.6</span>    <span class="number">689</span>    <span class="number">3338</span></span><br><span class="line"><span class="attr">Waiting:</span>       <span class="number">70</span>  <span class="number">435</span> <span class="number">517.5</span>    <span class="number">169</span>    <span class="number">2383</span></span><br><span class="line"><span class="attr">Total:</span>        <span class="number">379</span> <span class="number">1903</span> <span class="number">1268.2</span>   <span class="number">1717</span>   <span class="number">10272</span></span><br><span class="line"></span><br><span class="line"><span class="string">Percentage</span> <span class="string">of</span> <span class="string">the</span> <span class="string">requests</span> <span class="string">served</span> <span class="string">within</span> <span class="string">a</span> <span class="string">certain</span> <span class="string">time</span> <span class="string">(ms)</span> <span class="comment">#每个请求处理时间的分布情况，比如：50%请求处理时间在1717ms内</span></span><br><span class="line">  <span class="number">50</span><span class="string">%</span>   <span class="number">1717</span></span><br><span class="line">  <span class="number">66</span><span class="string">%</span>   <span class="number">2359</span></span><br><span class="line">  <span class="number">75</span><span class="string">%</span>   <span class="number">2667</span></span><br><span class="line">  <span class="number">80</span><span class="string">%</span>   <span class="number">2750</span></span><br><span class="line">  <span class="number">90</span><span class="string">%</span>   <span class="number">3374</span></span><br><span class="line">  <span class="number">95</span><span class="string">%</span>   <span class="number">3534</span></span><br><span class="line">  <span class="number">98</span><span class="string">%</span>   <span class="number">3928</span></span><br><span class="line">  <span class="number">99</span><span class="string">%</span>  <span class="number">10272</span></span><br><span class="line"> <span class="number">100</span><span class="string">%</span>  <span class="number">10272</span> <span class="string">(longest</span> <span class="string">request)</span></span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/ab/" rel="tag"># ab</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/11/25/ES索引设置/" rel="next" title="ES索引设置">
+                <i class="fa fa-chevron-left"></i> ES索引设置
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/11/22/IP命令集/" rel="prev" title="IP命令集">
+                IP命令集 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.gif"
+                alt="devil" />
+            
+              <p class="site-author-name" itemprop="name">devil</p>
+              <p class="site-description motion-element" itemprop="description">Good Good Study！Day Day Up！</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">27</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">18</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/rss2.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/hanjh310" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#介绍"><span class="nav-number">1.</span> <span class="nav-text">介绍</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#用法"><span class="nav-number">2.</span> <span class="nav-text">用法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#简单测试结果"><span class="nav-number">3.</span> <span class="nav-text">简单测试结果</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">devil</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.3</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://https-blog-loveops-org.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://blog.loveops.com/2016/12/09/HTTP基准测试工具AB介绍/';
+          this.page.identifier = '2016/12/09/HTTP基准测试工具AB介绍/';
+          this.page.title = 'HTTP基准测试工具AB介绍';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://https-blog-loveops-org.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
